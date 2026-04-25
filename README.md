@@ -6,10 +6,19 @@
 
 ## Current Project Docs
 
+**TLSNotary Focus:**
+
+- Template registry README: `docs/tlsnotary/README.md` (start here)
+- TLSNotary workflow guide: `docs/tlsnotary/TLSNOTARY_WORKFLOW.md`
+- Fixture format & examples: `docs/tlsnotary/FIXTURE_FORMAT.md`
+- Template validator tool: `scripts/validate-template.js`
+
+**General:**
+
 - Direction and execution order: `docs/DIRECTION.md`
-- TLSNotary seed library overview: `docs/tlsnotary/SEED_TEMPLATE_LIBRARY.md`
-- TLSNotary template schema: `docs/tlsnotary/schema/template.schema.json`
-- Seed templates index: `docs/tlsnotary/templates/index.json`
+- Seed template library overview: `docs/tlsnotary/SEED_TEMPLATE_LIBRARY.md`
+- Template schema: `docs/tlsnotary/schema/template.schema.json`
+- Badge storage model: `docs/BADGE_STORAGE.md`
 
 ---
 

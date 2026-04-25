@@ -14,10 +14,10 @@
     "tls_min": "1.2"
   },
   "extract": {
-    "selector": "section[id*='experience'], .pvs-entity",
-    "pattern": "(Present|Current)",
+    "selector": "section[id*='experience-section'] h3, [data-test-id*='experience'] .pvs-entity__sub-line-top, [class*='employment'] [class*='present']",
+    "pattern": "(Present|Current|Actualmente|Actuellement|Derzeit|现在)",
     "transform": "match[1]",
-    "notes": "Per-profile DOM variation is high; requires robust fixtures."
+    "notes": "LinkedIn locale variations significant. Test across en_US, es_ES, fr_FR, de_DE, zh_CN. DOM highly variable by region. Requires fixture for each locale before notarization."
   },
   "disclose": {
     "mode": "boolean",

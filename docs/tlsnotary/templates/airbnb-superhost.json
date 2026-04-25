@@ -14,10 +14,10 @@
     "tls_min": "1.2"
   },
   "extract": {
-    "selector": "[data-testid='superhost-badge'], .superhost, .c1yo0219",
-    "pattern": "(Superhost)",
+    "selector": "[data-testid='superhost-badge'], [class*='SuperhostBadge'], span:contains('Superhost')",
+    "pattern": "(Superhost|Superhôte|Superanfitrión|Superhostwirt)",
     "transform": "match[1]",
-    "notes": "Test across localized language variants."
+    "notes": "Airbnb content varies by host language and region. Extract from host profile. Requires fixtures for en_US, fr_FR, es_ES, de_DE. Superhost status changes; recommend max_age_days=7."
   },
   "disclose": {
     "mode": "boolean",

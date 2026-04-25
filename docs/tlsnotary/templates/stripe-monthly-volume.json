@@ -14,10 +14,10 @@
     "tls_min": "1.2"
   },
   "extract": {
-    "selector": "[data-testid='gross-volume'], .BalanceSummary, .DashboardMetric",
+    "selector": "[data-testid='gross-volume'], [class*='BalanceSummary'], [class*='DashboardMetric'], .balance-value, [class*='volume']",
     "pattern": "\\$?([0-9,]+(?:\\.[0-9]{2})?)",
     "transform": "parseFloat(match[1].replace(/,/g, ''))",
-    "notes": "Validate selector against latest Stripe dashboard layout."
+    "notes": "Stripe dashboard DOM changes frequently. Validate before each notarization. Test against https://dashboard.stripe.com/dashboard. Selectors ordered by stability."
   },
   "disclose": {
     "mode": "threshold",

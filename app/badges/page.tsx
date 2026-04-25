@@ -179,6 +179,12 @@ export default async function BadgesPage() {
               Home
             </Link>
             <span style={{ color: "#e6edf3" }}>Badges</span>
+            <Link
+              href="/cases"
+              style={{ color: "#8b949e", textDecoration: "none" }}
+            >
+              Cases
+            </Link>
           </div>
         </div>
         <Link
@@ -239,6 +245,28 @@ export default async function BadgesPage() {
       <section
         style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 32px 80px" }}
       >
+        <div
+          style={{
+            marginBottom: 16,
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Link
+            href="/cases/sarah?badges=income%2Fstripe-monthly-volume%2Cdev%2Fgithub-account-age%2Ccredential%2Faws-certified-badge"
+            style={{
+              textDecoration: "none",
+              border: "1px solid #30363d",
+              borderRadius: 8,
+              color: "#e6edf3",
+              padding: "8px 12px",
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+          >
+            View example case page
+          </Link>
+        </div>
         <div
           style={{
             display: "grid",

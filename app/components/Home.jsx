@@ -128,6 +128,9 @@ export default function ZeroKnowledger() {
             <Link href="/badges" className="nav-link">
               Badges
             </Link>
+            <Link href="/cases" className="nav-link">
+              Cases
+            </Link>
             <span style={{ cursor: "pointer" }}>Unlocks</span>
             <span style={{ cursor: "pointer" }}>Docs</span>
           </div>

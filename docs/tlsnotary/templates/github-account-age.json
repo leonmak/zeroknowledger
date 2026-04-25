@@ -14,10 +14,10 @@
     "tls_min": "1.2"
   },
   "extract": {
-    "selector": "relative-time, .js-profile-editable-area",
+    "selector": "relative-time, [aria-label*='Created'], time, [class*='join-date']",
     "pattern": "([0-9]{4}-[0-9]{2}-[0-9]{2})",
     "transform": "Math.floor((Date.now() - Date.parse(match[1])) / 86400000)",
-    "notes": "Extract registration date from profile metadata if visible."
+    "notes": "GitHub uses relative-time element with datetime attr. Stable across locales. Test against public profile pages. Do not rely on calculated 'X years ago' text."
   },
   "disclose": {
     "mode": "threshold",

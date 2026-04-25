@@ -14,10 +14,10 @@
     "tls_min": "1.2"
   },
   "extract": {
-    "selector": ".account-section, [data-uia='plan-label'], .account-plan-details",
-    "pattern": "(Basic|Standard|Premium|Active)",
+    "selector": "[data-uia='account-plan-title'], [data-uia='membership-plan'], div[class*='PlanName'], [class*='plan-selector'] [class*='selected']",
+    "pattern": "(Basic|Standard|Premium|Ad-supported)",
     "transform": "match[1]",
-    "notes": "High DOM variability; confirm with fixtures before promotion."
+    "notes": "Netflix uses data-uia attributes (most stable). Avoid generic class selectors. Test against https://account.netflix.com/account. Plan names vary by region; add fixtures for US, EU, APAC."
   },
   "disclose": {
     "mode": "boolean",
