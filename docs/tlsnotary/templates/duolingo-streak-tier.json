@@ -1,0 +1,44 @@
+{
+  "name": "learning/duolingo-streak-tier",
+  "version": "0.1.0",
+  "status": "draft",
+  "claim": "Duolingo streak is at least 100 days.",
+  "owner": {
+    "team": "seed-library",
+    "reviewed_by": "pending"
+  },
+  "risk": "low",
+  "target": {
+    "url": "https://www.duolingo.com/profile",
+    "auth": "session",
+    "tls_min": "1.2"
+  },
+  "extract": {
+    "selector": "[data-test='streak-value'], .streak, ._3Tq95",
+    "pattern": "([0-9]+)",
+    "transform": "parseInt(match[1], 10)",
+    "notes": "Selector likely differs by app version and locale."
+  },
+  "disclose": {
+    "mode": "threshold",
+    "comparison": "gte",
+    "value": 100,
+    "output": "duolingo_streak_days_gte_100"
+  },
+  "redact": [
+    ".user-username",
+    ".user-fullname",
+    "img[alt='Profile Picture']",
+    ".email"
+  ],
+  "badge": {
+    "label": "Language Streak 100+",
+    "icon": "book-open",
+    "color": "#22C55E"
+  },
+  "freshness": {
+    "max_age_days": 14,
+    "stale_after_days": 21
+  },
+  "tags": ["learning", "consistency", "achievement"]
+}

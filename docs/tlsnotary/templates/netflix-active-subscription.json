@@ -1,0 +1,42 @@
+{
+  "name": "membership/netflix-active-subscription",
+  "version": "0.1.0",
+  "status": "draft",
+  "claim": "Netflix account has an active subscription plan.",
+  "owner": {
+    "team": "seed-library",
+    "reviewed_by": "pending"
+  },
+  "risk": "high",
+  "target": {
+    "url": "https://www.netflix.com/YourAccount",
+    "auth": "session",
+    "tls_min": "1.2"
+  },
+  "extract": {
+    "selector": ".account-section, [data-uia='plan-label'], .account-plan-details",
+    "pattern": "(Basic|Standard|Premium|Active)",
+    "transform": "match[1]",
+    "notes": "High DOM variability; confirm with fixtures before promotion."
+  },
+  "disclose": {
+    "mode": "boolean",
+    "output": "netflix_subscription_active"
+  },
+  "redact": [
+    ".account-email",
+    ".member-name",
+    ".payment-card",
+    ".phone-number"
+  ],
+  "badge": {
+    "label": "Netflix Member",
+    "icon": "play",
+    "color": "#DC2626"
+  },
+  "freshness": {
+    "max_age_days": 30,
+    "stale_after_days": 45
+  },
+  "tags": ["membership", "consumer", "subscription"]
+}

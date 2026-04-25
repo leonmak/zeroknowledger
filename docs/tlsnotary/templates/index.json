@@ -1,0 +1,80 @@
+{
+  "library": "tlsnotary-seed",
+  "version": "0.1.0",
+  "generated_at": "2026-04-25",
+  "count": 12,
+  "templates": [
+    {
+      "name": "income/stripe-monthly-volume",
+      "file": "stripe-monthly-volume.json",
+      "status": "draft",
+      "category": "income"
+    },
+    {
+      "name": "income/paypal-business-verified",
+      "file": "paypal-business-verified.json",
+      "status": "draft",
+      "category": "income"
+    },
+    {
+      "name": "dev/github-account-age",
+      "file": "github-account-age.json",
+      "status": "draft",
+      "category": "developer"
+    },
+    {
+      "name": "dev/github-contributions-90d",
+      "file": "github-contributions-90d.json",
+      "status": "draft",
+      "category": "developer"
+    },
+    {
+      "name": "career/linkedin-current-role",
+      "file": "linkedin-current-role.json",
+      "status": "draft",
+      "category": "career"
+    },
+    {
+      "name": "dev/stackoverflow-reputation-tier",
+      "file": "stackoverflow-reputation-tier.json",
+      "status": "draft",
+      "category": "developer"
+    },
+    {
+      "name": "credential/aws-certified-badge",
+      "file": "aws-certified-badge.json",
+      "status": "draft",
+      "category": "credential"
+    },
+    {
+      "name": "hospitality/airbnb-superhost",
+      "file": "airbnb-superhost.json",
+      "status": "draft",
+      "category": "hospitality"
+    },
+    {
+      "name": "freelance/upwork-top-rated",
+      "file": "upwork-top-rated.json",
+      "status": "draft",
+      "category": "freelance"
+    },
+    {
+      "name": "fitness/strava-active-athlete",
+      "file": "strava-active-athlete.json",
+      "status": "draft",
+      "category": "fitness"
+    },
+    {
+      "name": "learning/duolingo-streak-tier",
+      "file": "duolingo-streak-tier.json",
+      "status": "draft",
+      "category": "learning"
+    },
+    {
+      "name": "membership/netflix-active-subscription",
+      "file": "netflix-active-subscription.json",
+      "status": "draft",
+      "category": "membership"
+    }
+  ]
+}

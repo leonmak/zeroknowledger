@@ -1,0 +1,44 @@
+{
+  "name": "dev/github-contributions-90d",
+  "version": "0.1.0",
+  "status": "draft",
+  "claim": "GitHub account shows at least 50 contributions in the last 90 days.",
+  "owner": {
+    "team": "seed-library",
+    "reviewed_by": "pending"
+  },
+  "risk": "low",
+  "target": {
+    "url": "https://github.com",
+    "auth": "session",
+    "tls_min": "1.2"
+  },
+  "extract": {
+    "selector": "[data-testid='contribution-activity'], .js-yearly-contributions",
+    "pattern": "([0-9,]+) contributions? in the last year",
+    "transform": "parseInt(match[1].replace(/,/g, ''), 10)",
+    "notes": "Use rolling-window transform once fixture corpus exists."
+  },
+  "disclose": {
+    "mode": "threshold",
+    "comparison": "gte",
+    "value": 50,
+    "output": "github_contributions_90d_gte_50"
+  },
+  "redact": [
+    ".vcard-fullname",
+    ".p-note",
+    ".js-user-profile-bio",
+    "a[href*='followers']"
+  ],
+  "badge": {
+    "label": "Active OSS Contributor",
+    "icon": "git-branch",
+    "color": "#16A34A"
+  },
+  "freshness": {
+    "max_age_days": 30,
+    "stale_after_days": 45
+  },
+  "tags": ["developer", "oss", "activity"]
+}

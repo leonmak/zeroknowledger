@@ -1,0 +1,42 @@
+{
+  "name": "career/linkedin-current-role",
+  "version": "0.1.0",
+  "status": "draft",
+  "claim": "LinkedIn profile contains a current role at a specified company.",
+  "owner": {
+    "team": "seed-library",
+    "reviewed_by": "pending"
+  },
+  "risk": "high",
+  "target": {
+    "url": "https://www.linkedin.com/in/me",
+    "auth": "session",
+    "tls_min": "1.2"
+  },
+  "extract": {
+    "selector": "section[id*='experience'], .pvs-entity",
+    "pattern": "(Present|Current)",
+    "transform": "match[1]",
+    "notes": "Per-profile DOM variation is high; requires robust fixtures."
+  },
+  "disclose": {
+    "mode": "boolean",
+    "output": "linkedin_current_role_present"
+  },
+  "redact": [
+    ".text-body-medium.break-words",
+    ".pv-text-details__left-panel",
+    ".inline-show-more-text",
+    "img.profile-photo-edit__preview"
+  ],
+  "badge": {
+    "label": "Current Professional Role",
+    "icon": "briefcase",
+    "color": "#2563EB"
+  },
+  "freshness": {
+    "max_age_days": 60,
+    "stale_after_days": 90
+  },
+  "tags": ["career", "employment", "identity"]
+}

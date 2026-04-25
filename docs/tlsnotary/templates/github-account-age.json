@@ -1,0 +1,44 @@
+{
+  "name": "dev/github-account-age",
+  "version": "0.1.0",
+  "status": "draft",
+  "claim": "GitHub account age is at least 365 days.",
+  "owner": {
+    "team": "seed-library",
+    "reviewed_by": "pending"
+  },
+  "risk": "low",
+  "target": {
+    "url": "https://github.com/settings/profile",
+    "auth": "session",
+    "tls_min": "1.2"
+  },
+  "extract": {
+    "selector": "relative-time, .js-profile-editable-area",
+    "pattern": "([0-9]{4}-[0-9]{2}-[0-9]{2})",
+    "transform": "Math.floor((Date.now() - Date.parse(match[1])) / 86400000)",
+    "notes": "Extract registration date from profile metadata if visible."
+  },
+  "disclose": {
+    "mode": "threshold",
+    "comparison": "gte",
+    "value": 365,
+    "output": "github_account_age_days_gte_365"
+  },
+  "redact": [
+    ".vcard-fullname",
+    ".vcard-username",
+    ".js-user-profile-bio",
+    "meta[name='user-login']"
+  ],
+  "badge": {
+    "label": "Established GitHub",
+    "icon": "code",
+    "color": "#10B981"
+  },
+  "freshness": {
+    "max_age_days": 180,
+    "stale_after_days": 365
+  },
+  "tags": ["developer", "identity", "reputation"]
+}

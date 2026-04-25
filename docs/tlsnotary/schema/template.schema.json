@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroknowledger.com/schemas/tlsnotary-template.schema.json",
+  "title": "ZeroKnowledger TLSNotary Template",
+  "type": "object",
+  "required": [
+    "name",
+    "version",
+    "status",
+    "claim",
+    "owner",
+    "target",
+    "extract",
+    "disclose",
+    "redact",
+    "badge",
+    "freshness"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+/[a-z0-9-]+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "tested", "production", "deprecated"]
+    },
+    "claim": {
+      "type": "string",
+      "minLength": 10
+    },
+    "owner": {
+      "type": "object",
+      "required": ["team", "reviewed_by"],
+      "properties": {
+        "team": { "type": "string" },
+        "reviewed_by": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "risk": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "target": {
+      "type": "object",
+      "required": ["url", "auth", "tls_min"],
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "auth": { "type": "string", "enum": ["session", "oauth", "api-key"] },
+        "tls_min": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "extract": {
+      "type": "object",
+      "required": ["selector", "pattern"],
+      "properties": {
+        "selector": { "type": "string" },
+        "pattern": { "type": "string" },
+        "transform": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "disclose": {
+      "type": "object",
+      "required": ["mode", "output"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["boolean", "threshold", "exact", "range"]
+        },
+        "comparison": {
+          "type": "string",
+          "enum": ["gte", "lte", "eq"]
+        },
+        "value": {
+          "oneOf": [
+            { "type": "number" },
+            { "type": "string" },
+            {
+              "type": "object",
+              "required": ["min", "max"],
+              "properties": {
+                "min": { "type": "number" },
+                "max": { "type": "number" }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "output": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "redact": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "badge": {
+      "type": "object",
+      "required": ["label", "icon", "color"],
+      "properties": {
+        "label": { "type": "string" },
+        "icon": { "type": "string" },
+        "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+      },
+      "additionalProperties": false
+    },
+    "freshness": {
+      "type": "object",
+      "required": ["max_age_days", "stale_after_days"],
+      "properties": {
+        "max_age_days": { "type": "integer", "minimum": 1 },
+        "stale_after_days": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

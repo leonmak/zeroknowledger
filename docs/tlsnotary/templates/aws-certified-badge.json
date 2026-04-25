@@ -1,0 +1,37 @@
+{
+  "name": "credential/aws-certified-badge",
+  "version": "0.1.0",
+  "status": "draft",
+  "claim": "AWS Certification account lists at least one active certification.",
+  "owner": {
+    "team": "seed-library",
+    "reviewed_by": "pending"
+  },
+  "risk": "medium",
+  "target": {
+    "url": "https://cp.certmetrics.com/amazon/en/public/verification.aspx",
+    "auth": "session",
+    "tls_min": "1.2"
+  },
+  "extract": {
+    "selector": "table, .certification-list, .credential-card",
+    "pattern": "(AWS Certified)",
+    "transform": "match[1]",
+    "notes": "Validate against current AWS certification portal DOM."
+  },
+  "disclose": {
+    "mode": "boolean",
+    "output": "aws_certification_present"
+  },
+  "redact": [".candidate-name", ".candidate-id", ".email", ".address"],
+  "badge": {
+    "label": "AWS Certified",
+    "icon": "shield",
+    "color": "#F97316"
+  },
+  "freshness": {
+    "max_age_days": 180,
+    "stale_after_days": 365
+  },
+  "tags": ["credential", "cloud", "career"]
+}

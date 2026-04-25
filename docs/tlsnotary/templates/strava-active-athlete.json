@@ -1,0 +1,44 @@
+{
+  "name": "fitness/strava-active-athlete",
+  "version": "0.1.0",
+  "status": "draft",
+  "claim": "Strava profile shows at least 10 activities in the last 30 days.",
+  "owner": {
+    "team": "seed-library",
+    "reviewed_by": "pending"
+  },
+  "risk": "low",
+  "target": {
+    "url": "https://www.strava.com/dashboard",
+    "auth": "session",
+    "tls_min": "1.2"
+  },
+  "extract": {
+    "selector": ".activity-summary, .recent-activity, [data-testid='activity-feed']",
+    "pattern": "([0-9]+)",
+    "transform": "parseInt(match[1], 10)",
+    "notes": "Use fixture transform to derive 30-day count from feed data."
+  },
+  "disclose": {
+    "mode": "threshold",
+    "comparison": "gte",
+    "value": 10,
+    "output": "strava_activities_30d_gte_10"
+  },
+  "redact": [
+    ".athlete-name",
+    ".athlete-location",
+    ".profile-heading img",
+    ".activity-map"
+  ],
+  "badge": {
+    "label": "Active Athlete",
+    "icon": "activity",
+    "color": "#EA580C"
+  },
+  "freshness": {
+    "max_age_days": 14,
+    "stale_after_days": 30
+  },
+  "tags": ["fitness", "activity", "lifestyle"]
+}

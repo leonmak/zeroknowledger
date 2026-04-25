@@ -1,0 +1,42 @@
+{
+  "name": "income/paypal-business-verified",
+  "version": "0.1.0",
+  "status": "draft",
+  "claim": "User has an active PayPal business account in good standing.",
+  "owner": {
+    "team": "seed-library",
+    "reviewed_by": "pending"
+  },
+  "risk": "medium",
+  "target": {
+    "url": "https://www.paypal.com/businessmanage/summary",
+    "auth": "session",
+    "tls_min": "1.2"
+  },
+  "extract": {
+    "selector": "[data-testid='account-type'], .businessProfile, .merchant-status",
+    "pattern": "(Business|Merchant|Verified)",
+    "transform": "match[1]",
+    "notes": "Confirm locale-specific text variants."
+  },
+  "disclose": {
+    "mode": "boolean",
+    "output": "paypal_business_account_verified"
+  },
+  "redact": [
+    "[data-testid='merchant-email']",
+    ".account-number",
+    ".phone-number",
+    "meta[name='csrf-token']"
+  ],
+  "badge": {
+    "label": "PayPal Business",
+    "icon": "briefcase",
+    "color": "#0EA5E9"
+  },
+  "freshness": {
+    "max_age_days": 60,
+    "stale_after_days": 90
+  },
+  "tags": ["income", "business", "payments"]
+}

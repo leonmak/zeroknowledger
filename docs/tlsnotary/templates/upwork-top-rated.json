@@ -1,0 +1,42 @@
+{
+  "name": "freelance/upwork-top-rated",
+  "version": "0.1.0",
+  "status": "draft",
+  "claim": "Upwork account has Top Rated or Top Rated Plus status.",
+  "owner": {
+    "team": "seed-library",
+    "reviewed_by": "pending"
+  },
+  "risk": "medium",
+  "target": {
+    "url": "https://www.upwork.com/freelancers",
+    "auth": "session",
+    "tls_min": "1.2"
+  },
+  "extract": {
+    "selector": ".badge, [data-test='badge-section'], .air3-badge",
+    "pattern": "(Top Rated Plus|Top Rated)",
+    "transform": "match[1]",
+    "notes": "Confirm selectors for both profile and dashboard views."
+  },
+  "disclose": {
+    "mode": "boolean",
+    "output": "upwork_top_rated_status"
+  },
+  "redact": [
+    ".freelancer-name",
+    ".location",
+    ".hourly-rate",
+    "img.profile-avatar"
+  ],
+  "badge": {
+    "label": "Top Rated Freelancer",
+    "icon": "star",
+    "color": "#84CC16"
+  },
+  "freshness": {
+    "max_age_days": 30,
+    "stale_after_days": 45
+  },
+  "tags": ["freelance", "work", "reputation"]
+}

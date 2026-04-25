@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 
 import Badge from "./Badge";
 import Counter from "./Counter";
@@ -64,6 +65,9 @@ export default function ZeroKnowledger() {
         .btn1:hover { background: #56d364; }
         .btn2 { background: #161b22; color: #e6edf3; border: 1px solid #30363d; font-family: Inter; font-weight: 600; font-size: 14px; padding: 12px 24px; cursor: pointer; transition: all 0.2s; border-radius: 8px; }
         .btn2:hover { border-color: #484f58; background: #1f2937; }
+        .btn-link { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+        .nav-link { color: #8b949e; text-decoration: none; }
+        .nav-link:hover { color: #e6edf3; }
 
         .unlock-tab { border: none; background: transparent; cursor: pointer; padding: 12px 16px; border-radius: 8px; transition: all 0.2s; text-align: left; width: 100%; }
         .unlock-tab:hover { background: #161b22; }
@@ -121,6 +125,9 @@ export default function ZeroKnowledger() {
             }}
           >
             <span style={{ color: "#e6edf3", cursor: "pointer" }}>Methods</span>
+            <Link href="/badges" className="nav-link">
+              Badges
+            </Link>
             <span style={{ cursor: "pointer" }}>Unlocks</span>
             <span style={{ cursor: "pointer" }}>Docs</span>
           </div>
@@ -218,13 +225,16 @@ export default function ZeroKnowledger() {
 
         <FadeIn delay={300}>
           <div style={{ display: "flex", gap: 12, marginBottom: 48 }}>
-            <button
-              className="btn1"
+            <Link
+              href="/badges"
+              className="btn1 btn-link"
               style={{ borderRadius: 8, padding: "14px 28px" }}
             >
               Get your first badge
-            </button>
-            <button className="btn2">I build methods →</button>
+            </Link>
+            <Link href="/badges" className="btn2 btn-link">
+              Browse top badges →
+            </Link>
           </div>
         </FadeIn>
 

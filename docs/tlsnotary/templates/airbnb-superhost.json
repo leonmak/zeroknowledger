@@ -1,0 +1,42 @@
+{
+  "name": "hospitality/airbnb-superhost",
+  "version": "0.1.0",
+  "status": "draft",
+  "claim": "Airbnb host profile indicates Superhost status.",
+  "owner": {
+    "team": "seed-library",
+    "reviewed_by": "pending"
+  },
+  "risk": "medium",
+  "target": {
+    "url": "https://www.airbnb.com/hosting",
+    "auth": "session",
+    "tls_min": "1.2"
+  },
+  "extract": {
+    "selector": "[data-testid='superhost-badge'], .superhost, .c1yo0219",
+    "pattern": "(Superhost)",
+    "transform": "match[1]",
+    "notes": "Test across localized language variants."
+  },
+  "disclose": {
+    "mode": "boolean",
+    "output": "airbnb_superhost_status"
+  },
+  "redact": [
+    ".t1pxe1a4",
+    ".profile-name",
+    ".host-email",
+    "img[alt*='profile']"
+  ],
+  "badge": {
+    "label": "Airbnb Superhost",
+    "icon": "home",
+    "color": "#EF4444"
+  },
+  "freshness": {
+    "max_age_days": 30,
+    "stale_after_days": 45
+  },
+  "tags": ["hospitality", "trust", "commerce"]
+}

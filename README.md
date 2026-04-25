@@ -4,6 +4,13 @@
 **Last updated:** April 25, 2026  
 **Status:** Pre-launch, landing page built
 
+## Current Project Docs
+
+- Direction and execution order: `docs/DIRECTION.md`
+- TLSNotary seed library overview: `docs/tlsnotary/SEED_TEMPLATE_LIBRARY.md`
+- TLSNotary template schema: `docs/tlsnotary/schema/template.schema.json`
+- Seed templates index: `docs/tlsnotary/templates/index.json`
+
 ---
 
 ## 1. One-Line Summary
