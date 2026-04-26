@@ -1,3 +1,4 @@
+import Nav from "@/app/components/Nav";
 import Link from "next/link";
 
 type PageProps = {
@@ -66,57 +67,7 @@ export default async function UnlockClaimPage({
         fontFamily: "Inter, sans-serif",
       }}
     >
-      <nav
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 30,
-          padding: "12px 32px",
-          borderBottom: "1px solid #1f2937",
-          background: "rgba(13,17,23,0.92)",
-          backdropFilter: "blur(12px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 22,
-              height: 22,
-              borderRadius: 5,
-              background: "linear-gradient(135deg, #7ee787, #56d364)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 13,
-              fontWeight: 800,
-              color: "#0d1117",
-            }}
-          >
-            Z
-          </div>
-          <span style={{ fontWeight: 800, fontSize: 15 }}>zeroknowledger</span>
-          <div
-            style={{ display: "flex", gap: 16, marginLeft: 20, fontSize: 14 }}
-          >
-            <Link href="/" style={NAV_LINK}>
-              Home
-            </Link>
-            <Link href="/badges" style={NAV_LINK}>
-              Badges
-            </Link>
-            <Link href="/cases" style={NAV_LINK}>
-              Cases
-            </Link>
-            <Link href="/unlocks" style={NAV_LINK}>
-              Unlocks
-            </Link>
-          </div>
-        </div>
-      </nav>
-
+      <Nav activeTab="unlocks" />
       <section
         style={{ maxWidth: 680, margin: "0 auto", padding: "56px 32px" }}
       >

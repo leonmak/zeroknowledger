@@ -96,20 +96,19 @@ export default function Nav({ activeTab = "/" }) {
             Badges
           </Link>
           <Link
-            href="/cases"
-            className="nav-link"
-            style={activeStyle("/cases")}
-          >
-            Cases
-          </Link>
-          <Link
             href="/unlocks"
             className="nav-link"
             style={activeStyle("/unlocks")}
           >
             Unlocks
           </Link>
-          <span style={{ cursor: "pointer" }}>Docs</span>
+          <Link
+            href="/cases"
+            className="nav-link"
+            style={activeStyle("/cases")}
+          >
+            Cases
+          </Link>
         </div>
       </div>
       <div className="zk-hide-mobile" style={{ display: "flex", gap: 12 }}>
