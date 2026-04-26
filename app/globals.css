@@ -24,3 +24,17 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.zk-nav {
+  flex-direction: row;
+}
+
+@media (max-width: 640px) {
+  .zk-hide-mobile {
+    display: none !important;
+  }
+
+  .zk-nav {
+    padding: 14px 16px !important;
+  }
+}

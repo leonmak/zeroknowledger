@@ -1,8 +1,25 @@
 import Link from "next/link";
 
 export default function Nav({ activeTab = "/" }) {
-  const activeStyle = function (tabName) {
-    return activeTab === tabName
+  const normalizeTab = function (value) {
+    if (!value) return "/";
+
+    const cleaned = String(value).replace(/^\/+|\/+$/g, "");
+    return cleaned ? `/${cleaned}` : "/";
+  };
+
+  const isTabActive = function (tabValue) {
+    const currentTab = normalizeTab(activeTab);
+    const targetTab = normalizeTab(tabValue);
+
+    return (
+      currentTab === targetTab ||
+      (targetTab !== "/" && currentTab.startsWith(`${targetTab}/`))
+    );
+  };
+
+  const activeStyle = function (tabValue) {
+    return isTabActive(tabValue)
       ? {
           fontWeight: "bold",
           opacity: 0.8,
@@ -11,13 +28,9 @@ export default function Nav({ activeTab = "/" }) {
       : {};
   };
 
-  function isMobile() {
-    if (typeof window === "undefined") return false;
-    return window.innerWidth <= 640;
-  }
-
   return (
     <nav
+      className="zk-nav"
       style={{
         left: 0,
         right: 0,
@@ -29,9 +42,7 @@ export default function Nav({ activeTab = "/" }) {
         background: "rgba(13,17,23,0.85)",
         backdropFilter: "blur(16px)",
         borderBottom: "1px solid #1f2937",
-        display: "flex",
         gap: "10px",
-        flexDirection: isMobile() ? "column" : "row",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
@@ -57,8 +68,8 @@ export default function Nav({ activeTab = "/" }) {
             Z
           </div>
           <span
+            className="zk-hide-mobile"
             style={{
-              display: isMobile() ? "none" : "block",
               fontWeight: 800,
               fontSize: 15,
               letterSpacing: "-0.5px",
@@ -68,6 +79,7 @@ export default function Nav({ activeTab = "/" }) {
           </span>
         </Link>
         <div
+          className="zk-hide-mobile"
           style={{
             display: "flex",
             gap: 20,
@@ -79,24 +91,28 @@ export default function Nav({ activeTab = "/" }) {
           <Link
             href="/badges"
             className="nav-link"
-            style={activeStyle("badges")}
+            style={activeStyle("/badges")}
           >
             Badges
           </Link>
-          <Link href="/cases" className="nav-link" style={activeStyle("cases")}>
+          <Link
+            href="/cases"
+            className="nav-link"
+            style={activeStyle("/cases")}
+          >
             Cases
           </Link>
           <Link
             href="/unlocks"
             className="nav-link"
-            style={activeStyle("unlocks")}
+            style={activeStyle("/unlocks")}
           >
             Unlocks
           </Link>
           <span style={{ cursor: "pointer" }}>Docs</span>
         </div>
       </div>
-      <div style={{ display: "flex", gap: 12 }}>
+      <div className="zk-hide-mobile" style={{ display: "flex", gap: 12 }}>
         <button
           className="btn2"
           style={{ padding: "7px 16px", fontSize: 13, borderRadius: 6 }}
