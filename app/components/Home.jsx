@@ -6,6 +6,7 @@ import Badge from "./Badge";
 import Counter from "./Counter";
 import FadeIn from "./FadeIn";
 import TypeIcon from "./TypeIcon";
+import Nav from "./Nav";
 
 import {
   PROFILE_BADGES,
@@ -41,116 +42,7 @@ export default function ZeroKnowledger() {
         fontFamily: "Inter, sans-serif",
       }}
     >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800;900&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        ::selection { background: #7ee78844; color: #fff; }
-
-        .mc { border: 1px solid #1f2937; background: #0d1117; border-radius: 8px; padding: 20px; transition: all 0.2s; cursor: pointer; }
-        .mc:hover { border-color: #30363d; background: #161b22; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-
-        .pill { border: 1px solid #1f2937; background: transparent; color: #8b949e; font-family: Inter; font-size: 13px; font-weight: 500; padding: 6px 14px; cursor: pointer; transition: all 0.15s; border-radius: 20px; }
-        .pill:hover { border-color: #30363d; color: #e6edf3; }
-        .pill.on { border-color: #7ee787; color: #7ee787; background: rgba(126,231,135,0.06); }
-
-        .si { background: #161b22; border: 1px solid #1f2937; color: #e6edf3; font-family: Inter; font-size: 14px; padding: 10px 16px 10px 40px; width: 300px; outline: none; border-radius: 8px; transition: border-color 0.2s; }
-        .si:focus { border-color: #30363d; }
-        .si::placeholder { color: #30363d; }
-
-        .ei { background: #161b22; border: 1px solid #30363d; color: #e6edf3; font-family: Inter; font-size: 14px; padding: 14px 18px; width: 300px; outline: none; border-radius: 8px 0 0 8px; transition: border-color 0.2s; }
-        .ei:focus { border-color: #7ee787; }
-        .ei::placeholder { color: #30363d; }
-
-        .btn1 { background: #7ee787; color: #0d1117; border: none; font-family: Inter; font-weight: 700; font-size: 14px; padding: 14px 24px; cursor: pointer; transition: all 0.2s; border-radius: 0 8px 8px 0; }
-        .btn1:hover { background: #56d364; }
-        .btn2 { background: #161b22; color: #e6edf3; border: 1px solid #30363d; font-family: Inter; font-weight: 600; font-size: 14px; padding: 12px 24px; cursor: pointer; transition: all 0.2s; border-radius: 8px; }
-        .btn2:hover { border-color: #484f58; background: #1f2937; }
-        .btn-link { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
-        .nav-link { color: #8b949e; text-decoration: none; }
-        .nav-link:hover { color: #e6edf3; }
-
-        .unlock-tab { border: none; background: transparent; cursor: pointer; padding: 12px 16px; border-radius: 8px; transition: all 0.2s; text-align: left; width: 100%; }
-        .unlock-tab:hover { background: #161b22; }
-        .unlock-tab.on { background: #161b22; border: 1px solid #1f2937; }
-      `}</style>
-
-      {/* NAV */}
-      <nav
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          padding: "10px 32px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          background: "rgba(13,17,23,0.85)",
-          backdropFilter: "blur(16px)",
-          borderBottom: "1px solid #1f2937",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div
-              style={{
-                width: 22,
-                height: 22,
-                borderRadius: 5,
-                background: "linear-gradient(135deg, #7ee787, #56d364)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 13,
-                fontWeight: 800,
-                color: "#0d1117",
-              }}
-            >
-              Z
-            </div>
-            <span
-              style={{ fontWeight: 800, fontSize: 15, letterSpacing: "-0.5px" }}
-            >
-              zeroknowledger
-            </span>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              gap: 20,
-              fontSize: 14,
-              color: "#8b949e",
-              fontWeight: 500,
-            }}
-          >
-            <span style={{ color: "#e6edf3", cursor: "pointer" }}>Methods</span>
-            <Link href="/badges" className="nav-link">
-              Badges
-            </Link>
-            <Link href="/cases" className="nav-link">
-              Cases
-            </Link>
-            <span style={{ cursor: "pointer" }}>Unlocks</span>
-            <span style={{ cursor: "pointer" }}>Docs</span>
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 12 }}>
-          <button
-            className="btn2"
-            style={{ padding: "7px 16px", fontSize: 13, borderRadius: 6 }}
-          >
-            Sign in
-          </button>
-          <button
-            className="btn1"
-            style={{ padding: "7px 16px", fontSize: 13, borderRadius: 6 }}
-          >
-            Sign up
-          </button>
-        </div>
-      </nav>
-
+      <Nav />
       {/* HERO */}
       <section
         style={{

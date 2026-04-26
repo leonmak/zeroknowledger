@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import Link from "next/link";
+import Nav from "../components/Nav";
 
 type TemplateIndexEntry = {
   name: string;
@@ -136,72 +137,7 @@ export default async function BadgesPage() {
         fontFamily: "Inter, sans-serif",
       }}
     >
-      <nav
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 30,
-          padding: "12px 32px",
-          borderBottom: "1px solid #1f2937",
-          background: "rgba(13,17,23,0.92)",
-          backdropFilter: "blur(12px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 22,
-              height: 22,
-              borderRadius: 5,
-              background: "linear-gradient(135deg, #7ee787, #56d364)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 13,
-              fontWeight: 800,
-              color: "#0d1117",
-            }}
-          >
-            Z
-          </div>
-          <span
-            style={{ fontWeight: 800, fontSize: 15, letterSpacing: "-0.3px" }}
-          >
-            zeroknowledger
-          </span>
-          <div
-            style={{ display: "flex", gap: 16, marginLeft: 20, fontSize: 14 }}
-          >
-            <Link href="/" style={{ color: "#8b949e", textDecoration: "none" }}>
-              Home
-            </Link>
-            <span style={{ color: "#e6edf3" }}>Badges</span>
-            <Link
-              href="/cases"
-              style={{ color: "#8b949e", textDecoration: "none" }}
-            >
-              Cases
-            </Link>
-          </div>
-        </div>
-        <Link
-          href="/"
-          style={{
-            textDecoration: "none",
-            border: "1px solid #30363d",
-            borderRadius: 8,
-            color: "#e6edf3",
-            padding: "8px 14px",
-            fontSize: 13,
-            fontWeight: 600,
-          }}
-        >
-          Back to landing
-        </Link>
-      </nav>
+      <Nav activeTab="badges" />
 
       <section
         style={{ maxWidth: 1100, margin: "0 auto", padding: "56px 32px 20px" }}

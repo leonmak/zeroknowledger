@@ -27,6 +27,40 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800;900&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::selection { background: #7ee78844; color: #fff; }
+
+        .mc { border: 1px solid #1f2937; background: #0d1117; border-radius: 8px; padding: 20px; transition: all 0.2s; cursor: pointer; }
+        .mc:hover { border-color: #30363d; background: #161b22; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+
+        .pill { border: 1px solid #1f2937; background: transparent; color: #8b949e; font-family: Inter; font-size: 13px; font-weight: 500; padding: 6px 14px; cursor: pointer; transition: all 0.15s; border-radius: 20px; }
+        .pill:hover { border-color: #30363d; color: #e6edf3; }
+        .pill.on { border-color: #7ee787; color: #7ee787; background: rgba(126,231,135,0.06); }
+
+        .si { background: #161b22; border: 1px solid #1f2937; color: #e6edf3; font-family: Inter; font-size: 14px; padding: 10px 16px 10px 40px; width: 300px; outline: none; border-radius: 8px; transition: border-color 0.2s; }
+        .si:focus { border-color: #30363d; }
+        .si::placeholder { color: #30363d; }
+
+        .ei { background: #161b22; border: 1px solid #30363d; color: #e6edf3; font-family: Inter; font-size: 14px; padding: 14px 18px; width: 300px; outline: none; border-radius: 8px 0 0 8px; transition: border-color 0.2s; }
+        .ei:focus { border-color: #7ee787; }
+        .ei::placeholder { color: #30363d; }
+
+        .btn1 { background: #7ee787; color: #0d1117; border: none; font-family: Inter; font-weight: 700; font-size: 14px; padding: 14px 24px; cursor: pointer; transition: all 0.2s; border-radius: 0 8px 8px 0; }
+        .btn1:hover { background: #56d364; }
+        .btn2 { background: #161b22; color: #e6edf3; border: 1px solid #30363d; font-family: Inter; font-weight: 600; font-size: 14px; padding: 12px 24px; cursor: pointer; transition: all 0.2s; border-radius: 8px; }
+        .btn2:hover { border-color: #484f58; background: #1f2937; }
+        .btn-link { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+        .nav-link { color: #8b949e; text-decoration: none; }
+        .nav-link:hover { color: #e6edf3; }
+
+        .unlock-tab { border: none; background: transparent; cursor: pointer; padding: 12px 16px; border-radius: 8px; transition: all 0.2s; text-align: left; width: 100%; }
+        .unlock-tab:hover { background: #161b22; }
+        .unlock-tab.on { background: #161b22; border: 1px solid #1f2937; }
+      `}</style>
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

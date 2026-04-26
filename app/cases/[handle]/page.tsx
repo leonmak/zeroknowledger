@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import Link from "next/link";
+import Nav from "@/app/components/Nav";
 
 type TemplateIndexEntry = {
   name: string;
@@ -26,6 +27,11 @@ type BadgeTemplate = {
   target: {
     url: string;
     auth: string;
+    tls_min?: string;
+  };
+  freshness?: {
+    max_age_days: number;
+    stale_after_days: number;
   };
 };
 
@@ -115,59 +121,7 @@ export default async function CaseProfilePage({
         fontFamily: "Inter, sans-serif",
       }}
     >
-      <nav
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 30,
-          padding: "12px 32px",
-          borderBottom: "1px solid #1f2937",
-          background: "rgba(13,17,23,0.92)",
-          backdropFilter: "blur(12px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 22,
-              height: 22,
-              borderRadius: 5,
-              background: "linear-gradient(135deg, #7ee787, #56d364)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 13,
-              fontWeight: 800,
-              color: "#0d1117",
-            }}
-          >
-            Z
-          </div>
-          <span style={{ fontWeight: 800, fontSize: 15 }}>zeroknowledger</span>
-          <div
-            style={{ display: "flex", gap: 16, marginLeft: 20, fontSize: 14 }}
-          >
-            <Link href="/" style={{ color: "#8b949e", textDecoration: "none" }}>
-              Home
-            </Link>
-            <Link
-              href="/badges"
-              style={{ color: "#8b949e", textDecoration: "none" }}
-            >
-              Badges
-            </Link>
-            <Link
-              href="/cases"
-              style={{ color: "#e6edf3", textDecoration: "none" }}
-            >
-              Cases
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Nav activeTab="cases" />
 
       <section
         style={{ maxWidth: 1100, margin: "0 auto", padding: "52px 32px 16px" }}
@@ -194,6 +148,40 @@ export default async function CaseProfilePage({
         >
           @{handle}
         </h1>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 8,
+          }}
+        >
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              border: "1px solid #238636",
+              background: "#12261e",
+              borderRadius: 999,
+              padding: "3px 10px",
+              fontSize: 12,
+              color: "#7ee787",
+              fontWeight: 600,
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "#7ee787",
+                display: "inline-block",
+              }}
+            />
+            TLSNotary
+          </span>
+        </div>
         <p
           style={{
             color: "#8b949e",
@@ -202,8 +190,9 @@ export default async function CaseProfilePage({
             maxWidth: 720,
           }}
         >
-          This page shows badge claims selected by the user. Raw TLSNotary proof
-          material is not exposed in this view.
+          Each badge below is backed by a TLSNotary proof generated from a real
+          TLS session. Raw proof transcripts and account data are not shared in
+          this view.
         </p>
       </section>
 
@@ -333,6 +322,29 @@ export default async function CaseProfilePage({
                   >
                     {template.status}
                   </span>
+                  <span
+                    style={{
+                      border: "1px solid #1a3a2a",
+                      borderRadius: 999,
+                      padding: "2px 8px",
+                      fontSize: 11,
+                      color: "#7ee787",
+                      background: "#0d2018",
+                    }}
+                  >
+                    TLS {template.target.tls_min ?? "1.2"}+
+                  </span>
+                  <span
+                    style={{
+                      border: "1px solid #2d3742",
+                      borderRadius: 999,
+                      padding: "2px 8px",
+                      fontSize: 11,
+                      color: "#9fb3c8",
+                    }}
+                  >
+                    auth: {template.target.auth}
+                  </span>
                 </div>
 
                 <div
@@ -367,7 +379,7 @@ export default async function CaseProfilePage({
           }}
         >
           <h2 style={{ fontSize: 16, marginBottom: 8 }}>
-            Storage model for badges
+            How TLSNotary proofs are stored
           </h2>
           <ul
             style={{
@@ -378,16 +390,23 @@ export default async function CaseProfilePage({
             }}
           >
             <li>
-              Users do not need to upload raw TLS transcripts to the cloud to
-              share this page.
+              Raw TLS transcripts and session data{" "}
+              <strong style={{ color: "#e6edf3" }}>
+                never leave your device
+              </strong>
+              .
             </li>
             <li>
-              This page can run from badge references and signed claim metadata
-              only.
+              The TLSNotary notary co-signs the session without seeing your
+              plaintext data — only the redacted extract is shared.
             </li>
             <li>
-              Optional cloud sync can store encrypted attestations for
-              convenience, not plaintext proofs.
+              This page references badge IDs and signed claim metadata only. No
+              proof material is exposed here.
+            </li>
+            <li>
+              Optional: store encrypted attestations in the cloud for
+              convenience. Plaintext proofs should never be uploaded.
             </li>
           </ul>
         </div>
