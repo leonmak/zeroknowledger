@@ -1,0 +1,47 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "education/nus-graduate",
+  "version": "0.1.0",
+  "proof_type": "opencerts",
+  "runtime": ["web-wasm"],
+  "claim": "Holds a degree conferred by the National University of Singapore, shown by an NUS-issued OpenCerts certificate whose batch is recorded in NUS's certificate store and not revoked.",
+  "risk": "medium",
+  "disclose": { "mode": "presence", "output": "nus_degree_conferred" },
+  "nullifier": {
+    "scope": "opencerts:education/nus-graduate:v1",
+    "derived_from": "HMAC(server key, scope ‖ certificate targetHash): one badge holder per certificate"
+  },
+  "privacy": {
+    "summary": "Your browser hides every field except the degree title and NUS's details before anything is sent.",
+    "guarantees": [
+      "Your name, student ID, date of birth and grades never leave your browser; the server only gets their salted hashes, which can't be reversed or guessed.",
+      "The server stores only the badge and a keyed hash of the certificate, not the degree title."
+    ],
+    "limits": [
+      "Not zero-knowledge yet: the server sees the certificate's hash and its batch's Merkle root, which are stable identifiers. Anyone you've shown the full certificate to could link the two.",
+      "The degree title is revealed to the server when proving (it's how the server knows a degree was conferred)."
+    ],
+    "trust": [
+      "The zeroknowledger server, to discard the degree title and not log certificate hashes.",
+      "An Ethereum RPC provider sees the certificate and batch hashes when the server checks issuance and revocation."
+    ]
+  },
+  "badge": { "label": "NUS graduate", "icon": "graduation", "color": "#EF7C00" },
+  "freshness": { "max_age_days": 3650, "stale_after_days": 7300 },
+  "maintainers": ["leonmak"],
+  "source": { "name": "zeroknowledger", "path": "verifier/src/opencerts.ts" },
+  "changelog": "First release: selective disclosure, checked against NUS's certificate store on Ethereum.",
+  "tags": ["education", "university", "singapore"],
+  "config": {
+    "issuer": {
+      "name": "National University of Singapore",
+      "network": "ethereum-mainnet",
+      "certificate_store": "0xA204F16717fbF580d6A0535b58063fB4fce969fF"
+    },
+    "schemas": ["opencerts/v1.5", "opencerts/v2.0"],
+    "reveal": {
+      "required": ["issuers.0.certificateStore", "additionalData.degreeScroll.0.degreeTitle"],
+      "optional": ["issuers.0.name", "additionalData.degreeScroll.0.dateConferred"]
+    }
+  }
+}

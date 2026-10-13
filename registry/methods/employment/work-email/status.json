@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schema/status.schema.json",
+  "id": "employment/work-email",
+  "versions": {
+    "0.1.0": {
+      "health": "working",
+      "last_checked": "2026-10-01",
+      "health_note": "Works end to end (web page and CLI on Cloudflare Workers) for organisations that DKIM-sign their own internal mail, such as Google Workspace. Does not work for Microsoft 365 organisations: internal mail is delivered unsigned (confirmed with NUS). Many signers also leave cc out of h=, which this method requires.",
+      "soundness": "unreviewed"
+    }
+  }
+}

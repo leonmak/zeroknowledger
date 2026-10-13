@@ -9,26 +9,27 @@
   },
   "risk": "medium",
   "target": {
-    "url": "https://www.airbnb.com/hosting",
-    "auth": "session",
+    "api_url": "https://www.airbnb.com/api/v2/users/me?_format=for_roc&currency=USD",
+    "method": "GET",
+    "host": "www.airbnb.com",
+    "window_url": "https://www.airbnb.com.sg/users/profile",
+    "auth": {
+      "strategy": "cookie",
+      "intercept_filter": "https://www.airbnb.com/api/*",
+      "required_headers": ["Cookie"]
+    },
     "tls_min": "1.2"
   },
-  "extract": {
-    "selector": "[data-testid='superhost-badge'], [class*='SuperhostBadge'], span:contains('Superhost')",
-    "pattern": "(Superhost|Superhôte|Superanfitrión|Superhostwirt)",
-    "transform": "match[1]",
-    "notes": "Airbnb content varies by host language and region. Extract from host profile. Requires fixtures for en_US, fr_FR, es_ES, de_DE. Superhost status changes; recommend max_age_days=7."
+  "prove_params": {
+    "max_recv_data": 5000,
+    "max_sent_data": 4096,
+    "reveal_fields": ["user.superhost"],
+    "notes": "Airbnb user API returns user.superhost boolean. Superhost status is evaluated quarterly. Cookie auth from airbnb.com browser session."
   },
   "disclose": {
     "mode": "boolean",
     "output": "airbnb_superhost_status"
   },
-  "redact": [
-    ".t1pxe1a4",
-    ".profile-name",
-    ".host-email",
-    "img[alt*='profile']"
-  ],
   "badge": {
     "label": "Airbnb Superhost",
     "icon": "home",

@@ -9,26 +9,27 @@
   },
   "risk": "medium",
   "target": {
-    "url": "https://www.paypal.com/businessmanage/summary",
-    "auth": "session",
+    "api_url": "https://www.paypal.com/api/v2/account/profile",
+    "method": "GET",
+    "host": "www.paypal.com",
+    "window_url": "https://www.paypal.com/businessmanage/summary",
+    "auth": {
+      "strategy": "cookie",
+      "intercept_filter": "https://www.paypal.com/api/*",
+      "required_headers": ["Cookie"]
+    },
     "tls_min": "1.2"
   },
-  "extract": {
-    "selector": "[data-testid='account-type'], .businessProfile, .merchant-status",
-    "pattern": "(Business|Merchant|Verified)",
-    "transform": "match[1]",
-    "notes": "Confirm locale-specific text variants."
+  "prove_params": {
+    "max_recv_data": 3000,
+    "max_sent_data": 4096,
+    "reveal_fields": ["accountType", "verificationStatus"],
+    "notes": "PayPal internal API. Exact endpoint should be verified via DevTools on businessmanage/summary. Session cookies are large. If endpoint requires CSRF, change strategy to cookie+csrf."
   },
   "disclose": {
     "mode": "boolean",
     "output": "paypal_business_account_verified"
   },
-  "redact": [
-    "[data-testid='merchant-email']",
-    ".account-number",
-    ".phone-number",
-    "meta[name='csrf-token']"
-  ],
   "badge": {
     "label": "PayPal Business",
     "icon": "briefcase",

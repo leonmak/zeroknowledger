@@ -1,0 +1,1187 @@
+{
+  "proof_types": [
+    {
+      "id": "dkim-email",
+      "name": "DKIM-signed email",
+      "description": "Proves an email was addressed to an address at a domain and signed by that domain's DKIM key, without revealing the address. Noir circuit + UltraHonk (Barretenberg).",
+      "status": "available",
+      "runtimes": [
+        "web-wasm",
+        "cli"
+      ],
+      "verifier": {
+        "name": "zkbadge",
+        "path": "worker/verify.mjs"
+      }
+    },
+    {
+      "id": "tlsn",
+      "name": "TLSNotary",
+      "description": "Proves what an HTTPS server sent during a logged-in session (MPC-TLS with a verifier), revealing only selected parts of the response and hash-committing others. Methods that need uniqueness are verified in an attested enclave (Google Confidential Space, Intel TDX).",
+      "status": "experimental",
+      "runtimes": [
+        "extension-tlsn"
+      ],
+      "verifier": {
+        "name": "tlsn verifier server",
+        "path": "verifier/ (Cloudflare container) and verifier/gcp/ (Confidential Space enclave)"
+      }
+    },
+    {
+      "id": "opencerts",
+      "name": "OpenCerts / OpenAttestation",
+      "description": "Selective disclosure of an issuer-signed OpenAttestation document (e.g. a Singapore degree certificate): the browser hides every field except the ones a method reveals, and the verifier checks the hashes, the issuer's Merkle root on Ethereum, and revocation. Not zero-knowledge yet: the verifier sees the document's hash and batch.",
+      "status": "experimental",
+      "runtimes": [
+        "web-wasm"
+      ],
+      "verifier": {
+        "name": "opencerts verifier",
+        "path": "verifier/src/opencerts.ts"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "id": "career/linkedin-current-role",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "5f40643936a4e646c0490930846963ce014d383ef8a6cfe9424b31e095770a45",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "career/linkedin-current-role",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "LinkedIn profile contains a current role at a specified company.",
+        "risk": "high",
+        "disclose": {
+          "mode": "boolean",
+          "output": "linkedin_current_role_present"
+        },
+        "badge": {
+          "label": "Current Professional Role",
+          "icon": "briefcase",
+          "color": "#2563EB"
+        },
+        "freshness": {
+          "max_age_days": 60,
+          "stale_after_days": 90
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "career",
+          "employment",
+          "identity"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://www.linkedin.com/voyager/api/me",
+            "method": "GET",
+            "host": "www.linkedin.com",
+            "window_url": "https://www.linkedin.com/feed/",
+            "auth": {
+              "strategy": "cookie+csrf",
+              "intercept_filter": "https://www.linkedin.com/voyager/api/*",
+              "required_headers": [
+                "Cookie",
+                "csrf-token"
+              ]
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 3000,
+            "max_sent_data": 4096,
+            "reveal_fields": [
+              "miniProfile.occupation"
+            ],
+            "notes": "LinkedIn Voyager internal API. Requires both Cookie and csrf-token headers. Large session cookies require higher maxSentData. occupation field contains current title and company."
+          }
+        }
+      }
+    },
+    {
+      "id": "credential/aws-certified-badge",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "70ecde676481f5c187a44130ba36035ee0d18bab94d2636d4b621808933d16ee",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "credential/aws-certified-badge",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "AWS Certification account lists at least one active certification.",
+        "risk": "medium",
+        "disclose": {
+          "mode": "boolean",
+          "output": "aws_certification_present"
+        },
+        "badge": {
+          "label": "AWS Certified",
+          "icon": "shield",
+          "color": "#F97316"
+        },
+        "freshness": {
+          "max_age_days": 180,
+          "stale_after_days": 365
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "credential",
+          "cloud",
+          "career"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://api.credly.com/v1/me/earned_badges?filter=state::accepted&page_size=1",
+            "method": "GET",
+            "host": "api.credly.com",
+            "window_url": "https://www.credly.com/users/me",
+            "auth": {
+              "strategy": "bearer",
+              "intercept_filter": "https://api.credly.com/*",
+              "required_headers": [
+                "Authorization"
+              ]
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 5000,
+            "max_sent_data": 1000,
+            "reveal_fields": [
+              "data.0.badge_template.name",
+              "data.0.badge_template.issuer.name"
+            ],
+            "notes": "AWS certifications are issued via Credly. Bearer token intercepted from api.credly.com requests. Filter state::accepted excludes pending or revoked badges."
+          }
+        }
+      }
+    },
+    {
+      "id": "dev/github-account-age",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "3de90c1163b62fbd3a2638c8f872c3c43f702cdd70b586d3e39bdc624416587d",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "dev/github-account-age",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "GitHub account age is at least 365 days.",
+        "risk": "low",
+        "disclose": {
+          "mode": "threshold",
+          "comparison": "gte",
+          "value": 365,
+          "output": "github_account_age_days_gte_365"
+        },
+        "badge": {
+          "label": "Established GitHub",
+          "icon": "code",
+          "color": "#10B981"
+        },
+        "freshness": {
+          "max_age_days": 180,
+          "stale_after_days": 365
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "developer",
+          "identity",
+          "reputation"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://github.com/",
+            "method": "GET",
+            "host": "api.github.com",
+            "window_url": "https://github.com/",
+            "auth": {
+              "strategy": "cookie",
+              "intercept_filter": "https://github.com/*",
+              "required_headers": [
+                "Cookie"
+              ]
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 30000,
+            "max_sent_data": 10000,
+            "reveal_fields": [
+              "created_at"
+            ],
+            "notes": "Bearer token intercepted from github.com browser session. Response includes created_at ISO 8601 timestamp. Verifier computes account age in days."
+          }
+        }
+      }
+    },
+    {
+      "id": "dev/github-contributions-90d",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "f89b04db80e75d0a6b0a6718d56f82546a05fefeda9509e46d79901a3136d118",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "dev/github-contributions-90d",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "GitHub account pushed code within the last 90 days.",
+        "risk": "low",
+        "disclose": {
+          "mode": "threshold",
+          "comparison": "gte",
+          "value": 50,
+          "output": "github_contributions_90d_gte_50"
+        },
+        "badge": {
+          "label": "Active OSS Contributor",
+          "icon": "git-branch",
+          "color": "#16A34A"
+        },
+        "freshness": {
+          "max_age_days": 30,
+          "stale_after_days": 45
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "developer",
+          "oss",
+          "activity"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://api.github.com/user/repos?type=owner&sort=pushed&per_page=1",
+            "method": "GET",
+            "host": "api.github.com",
+            "window_url": "https://github.com/",
+            "auth": {
+              "strategy": "cookie",
+              "intercept_filter": "https://github.com/*",
+              "required_headers": [
+                "Cookie"
+              ]
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 25000,
+            "max_sent_data": 10000,
+            "reveal_fields": [
+              "0.pushed_at",
+              "0.name"
+            ],
+            "notes": "Returns most recently pushed repo. Verifier checks that pushed_at is within 90 days. Does not reveal private repo details beyond name and push timestamp."
+          }
+        }
+      }
+    },
+    {
+      "id": "dev/stackoverflow-reputation-tier",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "fb2a3d4245b6498e37e75029c6694d8972c6efd61d26226384fe5f81675d9d48",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "dev/stackoverflow-reputation-tier",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "Proves an active Stack Overflow account via profile URL in authenticated page response.",
+        "risk": "low",
+        "disclose": {
+          "mode": "presence",
+          "output": "stackoverflow_account_verified"
+        },
+        "badge": {
+          "label": "Stack Overflow Trusted",
+          "icon": "verify",
+          "color": "#F59E0B"
+        },
+        "freshness": {
+          "max_age_days": 90,
+          "stale_after_days": 120
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "developer",
+          "knowledge",
+          "reputation"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://stackoverflow.com/",
+            "method": "GET",
+            "host": "stackoverflow.com",
+            "window_url": "https://stackoverflow.com/",
+            "auth": {
+              "strategy": "cookie",
+              "intercept_filter": "https://stackoverflow.com/",
+              "required_headers": [
+                "Cookie"
+              ],
+              "required_cookie": "_acct"
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 50000,
+            "max_sent_data": 2000,
+            "reveal_fields": [],
+            "reveal_regex": [
+              {
+                "regex": "\"profileUrl\":\"https://stackoverflow\\.com/users/\\d+/[^\"]+\""
+              }
+            ],
+            "notes": "Proves logged-in Stack Overflow account by extracting profileUrl from the authenticated HTML response."
+          }
+        }
+      }
+    },
+    {
+      "id": "education/nus-graduate",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "a4561a46d8f9a800bd78d6da5c48cd6f5cf0a1d5b4d8bb9189d40a10150995db",
+          "health": "working",
+          "health_note": "End to end with a real 2019 NUS certificate (opencerts/v1.5): browser disclosure, verifier check, Ethereum issuance and revocation lookups, badge issued, second holder rejected. The certificate store address is taken from that certificate and its on-chain record; not yet cross-checked against the official OpenCerts issuer registry.",
+          "soundness": "unreviewed",
+          "last_checked": "2026-10-01"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "education/nus-graduate",
+        "version": "0.1.0",
+        "proof_type": "opencerts",
+        "runtime": [
+          "web-wasm"
+        ],
+        "claim": "Holds a degree conferred by the National University of Singapore, shown by an NUS-issued OpenCerts certificate whose batch is recorded in NUS's certificate store and not revoked.",
+        "risk": "medium",
+        "disclose": {
+          "mode": "presence",
+          "output": "nus_degree_conferred"
+        },
+        "nullifier": {
+          "scope": "opencerts:education/nus-graduate:v1",
+          "derived_from": "HMAC(server key, scope ‖ certificate targetHash): one badge holder per certificate"
+        },
+        "privacy": {
+          "summary": "Your browser hides every field except the degree title and NUS's details before anything is sent.",
+          "guarantees": [
+            "Your name, student ID, date of birth and grades never leave your browser; the server only gets their salted hashes, which can't be reversed or guessed.",
+            "The server stores only the badge and a keyed hash of the certificate, not the degree title."
+          ],
+          "limits": [
+            "Not zero-knowledge yet: the server sees the certificate's hash and its batch's Merkle root, which are stable identifiers. Anyone you've shown the full certificate to could link the two.",
+            "The degree title is revealed to the server when proving (it's how the server knows a degree was conferred)."
+          ],
+          "trust": [
+            "The zeroknowledger server, to discard the degree title and not log certificate hashes.",
+            "An Ethereum RPC provider sees the certificate and batch hashes when the server checks issuance and revocation."
+          ]
+        },
+        "badge": {
+          "label": "NUS graduate",
+          "icon": "graduation",
+          "color": "#EF7C00"
+        },
+        "freshness": {
+          "max_age_days": 3650,
+          "stale_after_days": 7300
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "source": {
+          "name": "zeroknowledger",
+          "path": "verifier/src/opencerts.ts"
+        },
+        "changelog": "First release: selective disclosure, checked against NUS's certificate store on Ethereum.",
+        "tags": [
+          "education",
+          "university",
+          "singapore"
+        ],
+        "config": {
+          "issuer": {
+            "name": "National University of Singapore",
+            "network": "ethereum-mainnet",
+            "certificate_store": "0xA204F16717fbF580d6A0535b58063fB4fce969fF"
+          },
+          "schemas": [
+            "opencerts/v1.5",
+            "opencerts/v2.0"
+          ],
+          "reveal": {
+            "required": [
+              "issuers.0.certificateStore",
+              "additionalData.degreeScroll.0.degreeTitle"
+            ],
+            "optional": [
+              "issuers.0.name",
+              "additionalData.degreeScroll.0.dateConferred"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "employment/work-email",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "f1292be71a37b9d9c7668e642f04686603af91010c1d0c683447b69fe38fd416",
+          "health": "working",
+          "last_checked": "2026-10-01",
+          "health_note": "Works end to end (web page and CLI on Cloudflare Workers) for organisations that DKIM-sign their own internal mail, such as Google Workspace. Does not work for Microsoft 365 organisations: internal mail is delivered unsigned (confirmed with NUS). Many signers also leave cc out of h=, which this method requires.",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "employment/work-email",
+        "version": "0.1.0",
+        "proof_type": "dkim-email",
+        "runtime": [
+          "web-wasm",
+          "cli"
+        ],
+        "claim": "Received a DKIM-signed email addressed only to an address at this domain, signed with the domain's own key. Proves you had (or have) an address there, without revealing which.",
+        "risk": "medium",
+        "disclose": {
+          "mode": "exact",
+          "output": "recipient_domain"
+        },
+        "nullifier": {
+          "scope": "zkbadge-v1",
+          "derived_from": "pedersen(scope, length, lowercased recipient address): one claim per address"
+        },
+        "badge": {
+          "label": "Verified employee",
+          "icon": "briefcase",
+          "color": "#2F5D50"
+        },
+        "freshness": {
+          "max_age_days": 365,
+          "stale_after_days": 730
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "source": {
+          "name": "zkbadge",
+          "path": "circuits/zkbadge/src/main.nr"
+        },
+        "changelog": "First release (badge.zeroknowledger.com and the zkbadge CLI).",
+        "tags": [
+          "employment",
+          "email",
+          "career"
+        ],
+        "config": {
+          "circuit": {
+            "name": "zkbadge",
+            "noir_version": "1.0.0-beta.5",
+            "artifact_sha256": "e861d37f16646a4a7f0e5e8d790408f5dee7b613738353be74b241038c916d4a",
+            "vk_sha256": "5c9021656a11aea01b4e0b2a64bbd26152fa65164d15ad86e5373e82334d3a8e"
+          },
+          "header": {
+            "field": "to",
+            "max_signed_bytes": 1024
+          },
+          "key": {
+            "algorithm": "rsa-sha256",
+            "bits": 2048,
+            "lookup": "recipient-domain"
+          },
+          "rules": [
+            "The DKIM signature verifies over the signed headers.",
+            "Exactly one To header, holding exactly one address.",
+            "No Cc header, and the signature's h= tag lists cc (so the absence of Cc is signed).",
+            "The key is published under the recipient's own domain.",
+            "The proof is bound to a one-time code, so it can't be replayed on another link.",
+            "Bcc recipients can't be detected: use emails sent only to you."
+          ]
+        }
+      }
+    },
+    {
+      "id": "fitness/strava-active-athlete",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "172cc8c5eaf0f9a6038c31c0c5575f31296a233ab6071fafd7464a817e8f10e6",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "fitness/strava-active-athlete",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "Strava profile shows at least one activity in the last 30 days.",
+        "risk": "low",
+        "disclose": {
+          "mode": "threshold",
+          "comparison": "gte",
+          "value": 10,
+          "output": "strava_activities_30d_gte_10"
+        },
+        "badge": {
+          "label": "Active Athlete",
+          "icon": "activity",
+          "color": "#EA580C"
+        },
+        "freshness": {
+          "max_age_days": 14,
+          "stale_after_days": 30
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "fitness",
+          "activity",
+          "lifestyle"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://www.strava.com/api/v3/athlete/activities?per_page=1",
+            "method": "GET",
+            "host": "www.strava.com",
+            "window_url": "https://www.strava.com/dashboard",
+            "auth": {
+              "strategy": "bearer",
+              "intercept_filter": "https://www.strava.com/api/v3/*",
+              "required_headers": [
+                "Authorization"
+              ]
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 3000,
+            "max_sent_data": 1000,
+            "reveal_fields": [
+              "0.start_date_local",
+              "0.type"
+            ],
+            "notes": "Bearer token intercepted from Strava browser session. Returns most recent activity. Verifier checks start_date_local is within 30 days. Activity type revealed but not checked."
+          }
+        }
+      }
+    },
+    {
+      "id": "freelance/upwork-top-rated",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "6860b2ad53a57c953e400f715dc3eb85fa87215874e919cc14dfb7a255adbfa8",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "freelance/upwork-top-rated",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "Upwork account has Top Rated or Top Rated Plus status.",
+        "risk": "medium",
+        "disclose": {
+          "mode": "boolean",
+          "output": "upwork_top_rated_status"
+        },
+        "badge": {
+          "label": "Top Rated Freelancer",
+          "icon": "star",
+          "color": "#84CC16"
+        },
+        "freshness": {
+          "max_age_days": 30,
+          "stale_after_days": 45
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "freelance",
+          "work",
+          "reputation"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://www.upwork.com/ab/talent-api/v2/contractor/me/badges",
+            "method": "GET",
+            "host": "www.upwork.com",
+            "window_url": "https://www.upwork.com/",
+            "auth": {
+              "strategy": "cookie",
+              "intercept_filter": "https://www.upwork.com/ab/talent-api/*",
+              "required_headers": [
+                "Cookie"
+              ]
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 3000,
+            "max_sent_data": 4096,
+            "reveal_fields": [
+              "badge.tier"
+            ],
+            "notes": "Upwork talent API returns badge object with tier field. Expected values: TOP_RATED, TOP_RATED_PLUS, or absent. Cookie auth from upwork.com browser session."
+          }
+        }
+      }
+    },
+    {
+      "id": "hospitality/airbnb-superhost",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "79c9b4070fa8cc6e675808e07b48e73f8a81fa44ab84b7329813b2c908b1d046",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "hospitality/airbnb-superhost",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "Airbnb host profile indicates Superhost status.",
+        "risk": "medium",
+        "disclose": {
+          "mode": "boolean",
+          "output": "airbnb_superhost_status"
+        },
+        "badge": {
+          "label": "Airbnb Superhost",
+          "icon": "home",
+          "color": "#EF4444"
+        },
+        "freshness": {
+          "max_age_days": 30,
+          "stale_after_days": 45
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "hospitality",
+          "trust",
+          "commerce"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://www.airbnb.com/api/v2/users/me?_format=for_roc&currency=USD",
+            "method": "GET",
+            "host": "www.airbnb.com",
+            "window_url": "https://www.airbnb.com.sg/users/profile",
+            "auth": {
+              "strategy": "cookie",
+              "intercept_filter": "https://www.airbnb.com/api/*",
+              "required_headers": [
+                "Cookie"
+              ]
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 5000,
+            "max_sent_data": 4096,
+            "reveal_fields": [
+              "user.superhost"
+            ],
+            "notes": "Airbnb user API returns user.superhost boolean. Superhost status is evaluated quarterly. Cookie auth from airbnb.com browser session."
+          }
+        }
+      }
+    },
+    {
+      "id": "identity/singpass-unique-person",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "22298396758760a8a013a5a4663e1a5cf67749bc0cecf26e4bf08ea9cf3b6b75",
+          "health": "working",
+          "last_checked": "2026-10-01",
+          "health_note": "Works end to end with the enclave verifier (MPC-TLS) and the TLSNotary extension build that returns commitment openings. Needs Singpass's extra 'Manage your Singpass account' login first, so the profile is on screen before you click Generate Proof.",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "identity/singpass-unique-person",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "A unique person: one account per app for each Singpass ID and its current mobile number. Neither leaves the holder's device.",
+        "risk": "high",
+        "disclose": {
+          "mode": "boolean",
+          "output": "singpass_unique_person"
+        },
+        "nullifier": {
+          "scope": "singpass-person",
+          "derived_from": "HMAC(enclave key, scope || app || H), H = Poseidon2(Singpass ID, mobile) proved in zero knowledge on the device; computed inside an attested enclave: one account per app for each Singpass ID and current mobile number"
+        },
+        "privacy": {
+          "summary": "Your Singpass ID (your NRIC/FIN number) and mobile number never leave your device. They're hash-committed during the TLS proof, and your browser proves in zero knowledge that a code H comes from them. Only that proof is sent, encrypted so that only an attested enclave can read it; the enclave checks it and turns H into a per-app id with a key only it holds.",
+          "guarantees": [
+            "The TLSNotary verifier only gets SHA256(field || 16 random bytes) for your Singpass ID and mobile. The random bytes are made on your device, so the hash can't be reversed by guessing.",
+            "The commitments are bound to a real TLS session with portal.singpass.gov.sg (MPC-TLS), so neither you nor the operator can substitute other values.",
+            "A zero-knowledge proof (Noir, UltraHonk), made on your device, shows that H = Poseidon2(Singpass ID, mobile) opens those commitments without revealing either value. Your Singpass ID and mobile never leave the device.",
+            "Your browser checks Google's attestation of the enclave itself, then encrypts the proof (which carries H) to a key only that enclave holds (HPKE). The registry and Cloudflare only relay ciphertext.",
+            "The enclave only accepts a proof for the commitments its own verifier authenticated, once per TLS session, so it can't be used to key guessed values.",
+            "Person ids are keyed (HMAC) per app with a key generated inside a Google Confidential Space enclave (Intel TDX) and only unsealed for published image digests. Apps, and anyone with the database, get unrelated ids for the same person in different apps."
+          ],
+          "limits": [
+            "The site's JavaScript makes the zero-knowledge proof, so it sees your Singpass ID and mobile in your browser. They aren't sent anywhere, but you trust the code served to you. Proving inside the extension would remove this (planned).",
+            "H is derived from your Singpass ID and mobile without a secret, so whoever can read it could test guesses; that's why it's only ever sent sealed to the enclave.",
+            "Needs a TLSNotary extension build that returns commitment openings to the page (an upstream pull request is planned).",
+            "Uniqueness is per Singpass ID and current mobile number: changing your number counts as a new person.",
+            "Not reviewed or audited yet."
+          ],
+          "trust": [
+            "Google Confidential Space and Intel TDX: the attestation that the enclave runs the published code.",
+            "The browser extension and the site code you load.",
+            "Singpass's response is what the badge is based on; Singpass isn't involved and doesn't endorse it."
+          ]
+        },
+        "badge": {
+          "label": "Verified Person - SG",
+          "icon": "fingerprint",
+          "color": "#9F1239"
+        },
+        "freshness": {
+          "max_age_days": 90,
+          "stale_after_days": 180
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "source": {
+          "name": "singpass_person",
+          "path": "verifier/circuits/singpass_person/src/main.nr"
+        },
+        "changelog": "First release: MPC-TLS verified in an attested Confidential Space enclave; a zero-knowledge proof made on the device, sealed to the enclave, which keys the person id per app.",
+        "tags": [
+          "identity",
+          "government",
+          "singapore",
+          "sybil-resistance"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://portal.singpass.gov.sg/home/api/secured/profile-update-details",
+            "method": "GET",
+            "host": "portal.singpass.gov.sg",
+            "window_url": "https://portal.singpass.gov.sg/home/ui/update-account/profile",
+            "auth": {
+              "strategy": "cookie",
+              "intercept_filter": "https://portal.singpass.gov.sg/home/api/*",
+              "required_headers": [
+                "Cookie"
+              ],
+              "required_cookie": "SP-PORTAL-SESSION-ID"
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 2048,
+            "max_sent_data": 4096,
+            "reveal_fields": [
+              "status"
+            ],
+            "notes": "Profile endpoint behind Singpass's 'Manage your Singpass account' step-up login. singpass_id and mobile_number are hash-committed (SHA256 with a blinder), never revealed. The browser proves in zero knowledge (circuits/singpass_person) that H = Poseidon2(Singpass ID, mobile) comes from those commitments and seals the proof to the attested enclave, which verifies it and keys H (HMAC) per app. The Singpass ID and mobile never leave the device. email and everything else stays hidden.",
+            "commit_fields": [
+              "result.singpass_id",
+              "result.mobile_number"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "income/paypal-business-verified",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "d4ff221443b2bf9c27761ca6f1a097e043852697293398789c21c82dadcb188a",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "income/paypal-business-verified",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "User has an active PayPal business account in good standing.",
+        "risk": "medium",
+        "disclose": {
+          "mode": "boolean",
+          "output": "paypal_business_account_verified"
+        },
+        "badge": {
+          "label": "PayPal Business",
+          "icon": "briefcase",
+          "color": "#0EA5E9"
+        },
+        "freshness": {
+          "max_age_days": 60,
+          "stale_after_days": 90
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "income",
+          "business",
+          "payments"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://www.paypal.com/api/v2/account/profile",
+            "method": "GET",
+            "host": "www.paypal.com",
+            "window_url": "https://www.paypal.com/businessmanage/summary",
+            "auth": {
+              "strategy": "cookie",
+              "intercept_filter": "https://www.paypal.com/api/*",
+              "required_headers": [
+                "Cookie"
+              ]
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 3000,
+            "max_sent_data": 4096,
+            "reveal_fields": [
+              "accountType",
+              "verificationStatus"
+            ],
+            "notes": "PayPal internal API. Exact endpoint should be verified via DevTools on businessmanage/summary. Session cookies are large. If endpoint requires CSRF, change strategy to cookie+csrf."
+          }
+        }
+      }
+    },
+    {
+      "id": "income/stripe-monthly-volume",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "da58935f7e53ff627ba5c208040f3b68e14363d89e80322be5e4ea0c35802c65",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "income/stripe-monthly-volume",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "User processed at least 10000 USD in recent monthly Stripe volume.",
+        "risk": "medium",
+        "disclose": {
+          "mode": "threshold",
+          "comparison": "gte",
+          "value": 10000,
+          "output": "stripe_monthly_volume_gte_10000"
+        },
+        "badge": {
+          "label": "Stripe Merchant",
+          "icon": "credit-card",
+          "color": "#22C55E"
+        },
+        "freshness": {
+          "max_age_days": 30,
+          "stale_after_days": 45
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "income",
+          "business",
+          "payments"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://dashboard.stripe.com/v1/reporting/reporting_runs?report_type=balance_change_from_activity.summary",
+            "method": "GET",
+            "host": "dashboard.stripe.com",
+            "window_url": "https://dashboard.stripe.com/",
+            "auth": {
+              "strategy": "cookie",
+              "intercept_filter": "https://dashboard.stripe.com/*",
+              "required_headers": [
+                "Cookie"
+              ]
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 5000,
+            "max_sent_data": 4096,
+            "reveal_fields": [
+              "data.0.result.net_volume"
+            ],
+            "notes": "Stripe dashboard internal API. Exact endpoint and response shape should be verified via DevTools on dashboard.stripe.com. Cookie auth from dashboard browser session. Large cookies require high maxSentData."
+          }
+        }
+      }
+    },
+    {
+      "id": "learning/duolingo-streak-tier",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "c18177ed2a48b2c7003177a297b9aca17c90d6f8f11435dd6f4cff3bc3aef8d7",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "learning/duolingo-streak-tier",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "Duolingo streak is at least 100 days.",
+        "risk": "low",
+        "disclose": {
+          "mode": "threshold",
+          "comparison": "gte",
+          "value": 100,
+          "output": "duolingo_streak_days_gte_100"
+        },
+        "badge": {
+          "label": "Language Streak 100+",
+          "icon": "book-open",
+          "color": "#22C55E"
+        },
+        "freshness": {
+          "max_age_days": 14,
+          "stale_after_days": 21
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "learning",
+          "consistency",
+          "achievement"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://www.duolingo.com/2017-06-30/me",
+            "method": "GET",
+            "host": "www.duolingo.com",
+            "window_url": "https://www.duolingo.com/",
+            "auth": {
+              "strategy": "cookie",
+              "intercept_filter": "https://www.duolingo.com/*",
+              "required_headers": [
+                "Cookie"
+              ]
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 4000,
+            "max_sent_data": 2000,
+            "reveal_fields": [
+              "streak_data.current_streak.length",
+              "username"
+            ],
+            "notes": "Duolingo /2017-06-30/me returns the authenticated user profile including streak_data. Cookie may be large. username field is revealed but not used in the threshold check."
+          }
+        }
+      }
+    },
+    {
+      "id": "membership/netflix-active-subscription",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "06bd7213e242b2d87dd827756b1ee390a1bd266fb32ff4af77c1bbd1be3f07ee",
+          "health": "untested",
+          "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "membership/netflix-active-subscription",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "Netflix account has an active subscription plan.",
+        "risk": "high",
+        "disclose": {
+          "mode": "boolean",
+          "output": "netflix_subscription_active"
+        },
+        "badge": {
+          "label": "Netflix Member",
+          "icon": "play",
+          "color": "#DC2626"
+        },
+        "freshness": {
+          "max_age_days": 30,
+          "stale_after_days": 45
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+        "tags": [
+          "membership",
+          "consumer",
+          "subscription"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://www.netflix.com/nq/website/memberapi/v1/memberships",
+            "method": "GET",
+            "host": "www.netflix.com",
+            "window_url": "https://www.netflix.com/YourAccount",
+            "auth": {
+              "strategy": "cookie",
+              "intercept_filter": "https://www.netflix.com/nq/*",
+              "required_headers": [
+                "Cookie"
+              ]
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 5000,
+            "max_sent_data": 4096,
+            "reveal_fields": [
+              "membership.state",
+              "membership.planName"
+            ],
+            "notes": "Netflix member API. Exact endpoint should be verified via DevTools on netflix.com/YourAccount. Cookie auth uses NetflixId and SecureNetflixId. membership.state should be CURRENT for active subscriptions."
+          }
+        }
+      }
+    }
+  ]
+}

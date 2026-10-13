@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: A method can prove something false (soundness)
+    url: https://github.com/leonmak/zeroknowledger/security/advisories/new
+    about: Report privately so it can be revoked before it's exploited.

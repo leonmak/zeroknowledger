@@ -1,0 +1,110 @@
+diff --git a/servers/verifier/src/main.rs b/servers/verifier/src/main.rs
+index 11ec113..1dae446 100644
+--- a/servers/verifier/src/main.rs
++++ b/servers/verifier/src/main.rs
+@@ -741,6 +741,16 @@ pub(crate) async fn proxy_ws_handler(
+     let host = query.token;
+     let session_id = query.session_id;
+ 
++    // ALLOWED_HOSTS (comma-separated) also limits the MPC-mode TCP relay: only
++    // port 443 of a listed host. Unset means any host (an open relay).
++    if let Ok(allowed) = std::env::var("ALLOWED_HOSTS") {
++        let (name, port) = host.split_once(':').unwrap_or((host.as_str(), "443"));
++        if port != "443" || !allowed.split(',').map(str::trim).any(|h| h.eq_ignore_ascii_case(name)) {
++            warn!("[Proxy] Refused relay to disallowed host {}", host);
++            return Err((StatusCode::FORBIDDEN, "host not allowed".to_string()));
++        }
++    }
++
+     info!(
+         "[Proxy] New proxy request for host: {}, sessionId: {:?}",
+         host, session_id
+diff --git a/servers/verifier/src/verifier.rs b/servers/verifier/src/verifier.rs
+index 207ffc5..90d4d84 100644
+--- a/servers/verifier/src/verifier.rs
++++ b/servers/verifier/src/verifier.rs
+@@ -11,7 +11,7 @@ use tlsn::{
+ use tokio::io::{AsyncRead, AsyncWrite};
+ use tokio::sync::oneshot;
+ use tokio_util::compat::TokioAsyncReadCompatExt;
+-use tracing::{debug, info};
++use tracing::info;
+ 
+ /// Core verifier logic that validates the TLS proof.
+ /// Supports both MPC and Proxy modes — the prover picks via its commit config.
+@@ -64,6 +64,13 @@ pub async fn verifier<T: AsyncWrite + AsyncRead + Send + Unpin + 'static>(
+         .map_err(|e| eyre!("Commitment failed: {}", e))?
+     {
+         VerifierCommitStart::Mpc(verifier) => {
++            if std::env::var("PROXY_ONLY").is_ok_and(|v| v == "1") {
++                verifier
++                    .reject(Some("this verifier only accepts proxy mode"))
++                    .await
++                    .map_err(|e| eyre!("Reject failed: {}", e))?;
++                return Err(eyre!("Rejected MPC commitment: PROXY_ONLY is set"));
++            }
+             let cfg = verifier.config();
+             if cfg.max_sent_data() > max_sent_data {
+                 return Err(eyre!(
+@@ -94,7 +101,27 @@ pub async fn verifier<T: AsyncWrite + AsyncRead + Send + Unpin + 'static>(
+                 .map_err(|e| eyre!("Run failed: {}", e))?
+         }
+         VerifierCommitStart::Proxy(verifier) => {
++            // MPC_ONLY=1 (e.g. inside an enclave, whose host controls the
++            // network): proxy mode trusts the verifier-to-server path, so refuse it.
++            if std::env::var("MPC_ONLY").is_ok_and(|v| v == "1") {
++                verifier
++                    .reject(Some("this verifier only accepts MPC-TLS"))
++                    .await
++                    .map_err(|e| eyre!("Reject failed: {}", e))?;
++                return Err(eyre!("Rejected proxy commitment: MPC_ONLY is set"));
++            }
+             let host = verifier.config().server_name().as_str().to_string();
++            // ALLOWED_HOSTS: comma-separated server names this verifier will
++            // connect to. Unset means any host (an open TLS relay).
++            if let Ok(allowed) = std::env::var("ALLOWED_HOSTS") {
++                if !allowed.split(',').map(str::trim).any(|h| h.eq_ignore_ascii_case(&host)) {
++                    verifier
++                        .reject(Some("server not allowed by this verifier"))
++                        .await
++                        .map_err(|e| eyre!("Reject failed: {}", e))?;
++                    return Err(eyre!("Rejected proxy commitment for disallowed host {}", host));
++                }
++            }
+             info!("Accepting Proxy TLS commitment for server: {}", host);
+ 
+             let server_addr = format!("{}:443", host);
+@@ -157,7 +184,8 @@ pub async fn verifier<T: AsyncWrite + AsyncRead + Send + Unpin + 'static>(
+         transcript.ok_or_else(|| eyre!("prover should have revealed transcript data"))?;
+ 
+     info!("server_name: {:?}", server_name);
+-    debug!("transcript: {:?}", &transcript);
++    // Revealed transcript data is never logged: it can contain personal data
++    // (e.g. an NRIC for nullifiers) that must not end up in log storage.
+ 
+     let sent = transcript.sent_unsafe().to_vec();
+     let received = transcript.received_unsafe().to_vec();
+@@ -169,11 +197,7 @@ pub async fn verifier<T: AsyncWrite + AsyncRead + Send + Unpin + 'static>(
+     info!("Verification successful!");
+     info!("============================================");
+ 
+-    info!("Sent data: {:?}", bytes_to_redacted_string(&sent, "\u{2588}")?);
+-    info!(
+-        "Received data: {:?}",
+-        bytes_to_redacted_string(&received, "\u{2588}")?
+-    );
++    info!("Revealed {} sent / {} received bytes (content not logged)", sent.len(), received.len());
+ 
+     info!(
+         "Hash commitments: {} (sent+recv)",
+@@ -189,10 +213,3 @@ fn compress_redacted_sequences(text: String) -> String {
+     let re = regex::Regex::new(r"\u{2588}{5,}").unwrap();
+     re.replace_all(&text, "\u{2588}\u{2026}\u{2588}").to_string()
+ }
+-
+-/// Render redacted bytes as block characters.
+-fn bytes_to_redacted_string(bytes: &[u8], to: &str) -> Result<String, eyre::ErrReport> {
+-    Ok(String::from_utf8(bytes.to_vec())
+-        .map_err(|err| eyre!("Failed to parse bytes to redacted string: {err}"))?
+-        .replace('\0', to))
+-}

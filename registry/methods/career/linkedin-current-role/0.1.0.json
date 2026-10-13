@@ -1,0 +1,58 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "career/linkedin-current-role",
+  "version": "0.1.0",
+  "proof_type": "tlsn",
+  "runtime": [
+    "extension-tlsn"
+  ],
+  "claim": "LinkedIn profile contains a current role at a specified company.",
+  "risk": "high",
+  "disclose": {
+    "mode": "boolean",
+    "output": "linkedin_current_role_present"
+  },
+  "badge": {
+    "label": "Current Professional Role",
+    "icon": "briefcase",
+    "color": "#2563EB"
+  },
+  "freshness": {
+    "max_age_days": 60,
+    "stale_after_days": 90
+  },
+  "maintainers": [
+    "leonmak"
+  ],
+  "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+  "tags": [
+    "career",
+    "employment",
+    "identity"
+  ],
+  "config": {
+    "target": {
+      "api_url": "https://www.linkedin.com/voyager/api/me",
+      "method": "GET",
+      "host": "www.linkedin.com",
+      "window_url": "https://www.linkedin.com/feed/",
+      "auth": {
+        "strategy": "cookie+csrf",
+        "intercept_filter": "https://www.linkedin.com/voyager/api/*",
+        "required_headers": [
+          "Cookie",
+          "csrf-token"
+        ]
+      },
+      "tls_min": "1.2"
+    },
+    "prove_params": {
+      "max_recv_data": 3000,
+      "max_sent_data": 4096,
+      "reveal_fields": [
+        "miniProfile.occupation"
+      ],
+      "notes": "LinkedIn Voyager internal API. Requires both Cookie and csrf-token headers. Large session cookies require higher maxSentData. occupation field contains current title and company."
+    }
+  }
+}

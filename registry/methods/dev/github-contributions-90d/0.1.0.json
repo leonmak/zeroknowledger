@@ -1,0 +1,60 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "dev/github-contributions-90d",
+  "version": "0.1.0",
+  "proof_type": "tlsn",
+  "runtime": [
+    "extension-tlsn"
+  ],
+  "claim": "GitHub account pushed code within the last 90 days.",
+  "risk": "low",
+  "disclose": {
+    "mode": "threshold",
+    "comparison": "gte",
+    "value": 50,
+    "output": "github_contributions_90d_gte_50"
+  },
+  "badge": {
+    "label": "Active OSS Contributor",
+    "icon": "git-branch",
+    "color": "#16A34A"
+  },
+  "freshness": {
+    "max_age_days": 30,
+    "stale_after_days": 45
+  },
+  "maintainers": [
+    "leonmak"
+  ],
+  "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+  "tags": [
+    "developer",
+    "oss",
+    "activity"
+  ],
+  "config": {
+    "target": {
+      "api_url": "https://api.github.com/user/repos?type=owner&sort=pushed&per_page=1",
+      "method": "GET",
+      "host": "api.github.com",
+      "window_url": "https://github.com/",
+      "auth": {
+        "strategy": "cookie",
+        "intercept_filter": "https://github.com/*",
+        "required_headers": [
+          "Cookie"
+        ]
+      },
+      "tls_min": "1.2"
+    },
+    "prove_params": {
+      "max_recv_data": 25000,
+      "max_sent_data": 10000,
+      "reveal_fields": [
+        "0.pushed_at",
+        "0.name"
+      ],
+      "notes": "Returns most recently pushed repo. Verifier checks that pushed_at is within 90 days. Does not reveal private repo details beyond name and push timestamp."
+    }
+  }
+}

@@ -1,0 +1,17 @@
+name: Better version or replacement
+description: Propose deprecating a version in favour of a newer one or another method.
+title: "[deprecate] <method id>@<version>"
+labels: ["deprecation"]
+body:
+  - type: input
+    id: method
+    attributes: { label: Method and version to deprecate }
+    validations: { required: true }
+  - type: input
+    id: replacement
+    attributes: { label: Replacement (version or method id) }
+    validations: { required: true }
+  - type: textarea
+    id: why
+    attributes: { label: Why it's better }
+    validations: { required: true }

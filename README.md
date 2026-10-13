@@ -15,6 +15,8 @@
 
 **General:**
 
+- Running the site, the Worker and the enclave: `docs/DEVELOPMENT.md`
+- Verified Person - SG, what goes over the network and why the hashes can't be reversed: `docs/SINGPASS_DATA_FLOW.md`
 - Direction and execution order: `docs/DIRECTION.md`
 - Seed template library overview: `docs/tlsnotary/SEED_TEMPLATE_LIBRARY.md`
 - Template schema: `docs/tlsnotary/schema/template.schema.json`

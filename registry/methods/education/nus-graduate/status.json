@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schema/status.schema.json",
+  "id": "education/nus-graduate",
+  "versions": {
+    "0.1.0": {
+      "health": "working",
+      "health_note": "End to end with a real 2019 NUS certificate (opencerts/v1.5): browser disclosure, verifier check, Ethereum issuance and revocation lookups, badge issued, second holder rejected. The certificate store address is taken from that certificate and its on-chain record; not yet cross-checked against the official OpenCerts issuer registry.",
+      "soundness": "unreviewed",
+      "last_checked": "2026-10-01"
+    }
+  }
+}

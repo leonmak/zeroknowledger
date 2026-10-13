@@ -1,0 +1,94 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "identity/singpass-unique-person",
+  "version": "0.1.0",
+  "proof_type": "tlsn",
+  "runtime": [
+    "extension-tlsn"
+  ],
+  "claim": "A unique person: one account per app for each Singpass ID and its current mobile number. Neither leaves the holder's device.",
+  "risk": "high",
+  "disclose": {
+    "mode": "boolean",
+    "output": "singpass_unique_person"
+  },
+  "nullifier": {
+    "scope": "singpass-person",
+    "derived_from": "HMAC(enclave key, scope || app || H), H = Poseidon2(Singpass ID, mobile) proved in zero knowledge on the device; computed inside an attested enclave: one account per app for each Singpass ID and current mobile number"
+  },
+  "privacy": {
+    "summary": "Your Singpass ID (your NRIC/FIN number) and mobile number never leave your device. They're hash-committed during the TLS proof, and your browser proves in zero knowledge that a code H comes from them. Only that proof is sent, encrypted so that only an attested enclave can read it; the enclave checks it and turns H into a per-app id with a key only it holds.",
+    "guarantees": [
+      "The TLSNotary verifier only gets SHA256(field || 16 random bytes) for your Singpass ID and mobile. The random bytes are made on your device, so the hash can't be reversed by guessing.",
+      "The commitments are bound to a real TLS session with portal.singpass.gov.sg (MPC-TLS), so neither you nor the operator can substitute other values.",
+      "A zero-knowledge proof (Noir, UltraHonk), made on your device, shows that H = Poseidon2(Singpass ID, mobile) opens those commitments without revealing either value. Your Singpass ID and mobile never leave the device.",
+      "Your browser checks Google's attestation of the enclave itself, then encrypts the proof (which carries H) to a key only that enclave holds (HPKE). The registry and Cloudflare only relay ciphertext.",
+      "The enclave only accepts a proof for the commitments its own verifier authenticated, once per TLS session, so it can't be used to key guessed values.",
+      "Person ids are keyed (HMAC) per app with a key generated inside a Google Confidential Space enclave (Intel TDX) and only unsealed for published image digests. Apps, and anyone with the database, get unrelated ids for the same person in different apps."
+    ],
+    "limits": [
+      "The site's JavaScript makes the zero-knowledge proof, so it sees your Singpass ID and mobile in your browser. They aren't sent anywhere, but you trust the code served to you. Proving inside the extension would remove this (planned).",
+      "H is derived from your Singpass ID and mobile without a secret, so whoever can read it could test guesses; that's why it's only ever sent sealed to the enclave.",
+      "Needs a TLSNotary extension build that returns commitment openings to the page (an upstream pull request is planned).",
+      "Uniqueness is per Singpass ID and current mobile number: changing your number counts as a new person.",
+      "Not reviewed or audited yet."
+    ],
+    "trust": [
+      "Google Confidential Space and Intel TDX: the attestation that the enclave runs the published code.",
+      "The browser extension and the site code you load.",
+      "Singpass's response is what the badge is based on; Singpass isn't involved and doesn't endorse it."
+    ]
+  },
+  "badge": {
+    "label": "Verified Person - SG",
+    "icon": "fingerprint",
+    "color": "#9F1239"
+  },
+  "freshness": {
+    "max_age_days": 90,
+    "stale_after_days": 180
+  },
+  "maintainers": [
+    "leonmak"
+  ],
+  "source": {
+    "name": "singpass_person",
+    "path": "verifier/circuits/singpass_person/src/main.nr"
+  },
+  "changelog": "First release: MPC-TLS verified in an attested Confidential Space enclave; a zero-knowledge proof made on the device, sealed to the enclave, which keys the person id per app.",
+  "tags": [
+    "identity",
+    "government",
+    "singapore",
+    "sybil-resistance"
+  ],
+  "config": {
+    "target": {
+      "api_url": "https://portal.singpass.gov.sg/home/api/secured/profile-update-details",
+      "method": "GET",
+      "host": "portal.singpass.gov.sg",
+      "window_url": "https://portal.singpass.gov.sg/home/ui/update-account/profile",
+      "auth": {
+        "strategy": "cookie",
+        "intercept_filter": "https://portal.singpass.gov.sg/home/api/*",
+        "required_headers": [
+          "Cookie"
+        ],
+        "required_cookie": "SP-PORTAL-SESSION-ID"
+      },
+      "tls_min": "1.2"
+    },
+    "prove_params": {
+      "max_recv_data": 2048,
+      "max_sent_data": 4096,
+      "reveal_fields": [
+        "status"
+      ],
+      "notes": "Profile endpoint behind Singpass's 'Manage your Singpass account' step-up login. singpass_id and mobile_number are hash-committed (SHA256 with a blinder), never revealed. The browser proves in zero knowledge (circuits/singpass_person) that H = Poseidon2(Singpass ID, mobile) comes from those commitments and seals the proof to the attested enclave, which verifies it and keys H (HMAC) per app. The Singpass ID and mobile never leave the device. email and everything else stays hidden.",
+      "commit_fields": [
+        "result.singpass_id",
+        "result.mobile_number"
+      ]
+    }
+  }
+}

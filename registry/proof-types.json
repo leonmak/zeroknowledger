@@ -1,0 +1,29 @@
+{
+  "$comment": "Proof types are the audited core (circuit or protocol + verifier). New ones are rare and reviewed by the core team; methods only configure them.",
+  "proof_types": [
+    {
+      "id": "dkim-email",
+      "name": "DKIM-signed email",
+      "description": "Proves an email was addressed to an address at a domain and signed by that domain's DKIM key, without revealing the address. Noir circuit + UltraHonk (Barretenberg).",
+      "status": "available",
+      "runtimes": ["web-wasm", "cli"],
+      "verifier": { "name": "zkbadge", "path": "worker/verify.mjs" }
+    },
+    {
+      "id": "tlsn",
+      "name": "TLSNotary",
+      "description": "Proves what an HTTPS server sent during a logged-in session (MPC-TLS with a verifier), revealing only selected parts of the response and hash-committing others. Methods that need uniqueness are verified in an attested enclave (Google Confidential Space, Intel TDX).",
+      "status": "experimental",
+      "runtimes": ["extension-tlsn"],
+      "verifier": { "name": "tlsn verifier server", "path": "verifier/ (Cloudflare container) and verifier/gcp/ (Confidential Space enclave)" }
+    },
+    {
+      "id": "opencerts",
+      "name": "OpenCerts / OpenAttestation",
+      "description": "Selective disclosure of an issuer-signed OpenAttestation document (e.g. a Singapore degree certificate): the browser hides every field except the ones a method reveals, and the verifier checks the hashes, the issuer's Merkle root on Ethereum, and revocation. Not zero-knowledge yet: the verifier sees the document's hash and batch.",
+      "status": "experimental",
+      "runtimes": ["web-wasm"],
+      "verifier": { "name": "opencerts verifier", "path": "verifier/src/opencerts.ts" }
+    }
+  ]
+}

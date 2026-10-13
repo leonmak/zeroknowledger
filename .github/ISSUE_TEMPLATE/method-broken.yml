@@ -1,0 +1,26 @@
+name: Method broken or flaky
+description: A method no longer produces proofs (site changed, regex stopped matching, login flow moved).
+title: "[broken] <method id>@<version>"
+labels: ["health"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is for **health** problems: new proofs can't be made. If a method can be tricked into proving something false,
+        **don't open an issue**: report it privately (see SECURITY.md).
+  - type: input
+    id: method
+    attributes: { label: Method and version, placeholder: career/linkedin-current-role@0.1.0 }
+    validations: { required: true }
+  - type: dropdown
+    id: severity
+    attributes:
+      label: What happens
+      options: ["Fails every time (broken)", "Fails sometimes (degraded)"]
+    validations: { required: true }
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Error message, what changed on the site, date first seen. Never paste cookies, tokens or personal data.
+    validations: { required: true }

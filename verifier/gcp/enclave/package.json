@@ -1,0 +1,10 @@
+{
+  "name": "zk-enclave-issuer",
+  "private": true,
+  "type": "module",
+  "description": "Dependencies of gcp/enclave/issuer.mjs (HPKE, to receive person proofs only the enclave can read).",
+  "dependencies": {
+    "@hpke/core": "1.9.0",
+    "@hpke/dhkem-x25519": "1.8.0"
+  }
+}

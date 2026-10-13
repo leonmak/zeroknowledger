@@ -2,7 +2,7 @@
   "library": "tlsnotary-seed",
   "version": "0.1.0",
   "generated_at": "2026-04-25",
-  "count": 12,
+  "count": 14,
   "templates": [
     {
       "name": "income/stripe-monthly-volume",
@@ -75,6 +75,12 @@
       "file": "netflix-active-subscription.json",
       "status": "draft",
       "category": "membership"
+    },
+    {
+      "name": "identity/singpass-unique-person",
+      "file": "singpass-unique-person.json",
+      "status": "draft",
+      "category": "identity"
     }
   ]
 }

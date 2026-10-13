@@ -1,0 +1,59 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "dev/github-account-age",
+  "version": "0.1.0",
+  "proof_type": "tlsn",
+  "runtime": [
+    "extension-tlsn"
+  ],
+  "claim": "GitHub account age is at least 365 days.",
+  "risk": "low",
+  "disclose": {
+    "mode": "threshold",
+    "comparison": "gte",
+    "value": 365,
+    "output": "github_account_age_days_gte_365"
+  },
+  "badge": {
+    "label": "Established GitHub",
+    "icon": "code",
+    "color": "#10B981"
+  },
+  "freshness": {
+    "max_age_days": 180,
+    "stale_after_days": 365
+  },
+  "maintainers": [
+    "leonmak"
+  ],
+  "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+  "tags": [
+    "developer",
+    "identity",
+    "reputation"
+  ],
+  "config": {
+    "target": {
+      "api_url": "https://github.com/",
+      "method": "GET",
+      "host": "api.github.com",
+      "window_url": "https://github.com/",
+      "auth": {
+        "strategy": "cookie",
+        "intercept_filter": "https://github.com/*",
+        "required_headers": [
+          "Cookie"
+        ]
+      },
+      "tls_min": "1.2"
+    },
+    "prove_params": {
+      "max_recv_data": 30000,
+      "max_sent_data": 10000,
+      "reveal_fields": [
+        "created_at"
+      ],
+      "notes": "Bearer token intercepted from github.com browser session. Response includes created_at ISO 8601 timestamp. Verifier computes account age in days."
+    }
+  }
+}

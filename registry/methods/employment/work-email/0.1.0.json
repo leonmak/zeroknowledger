@@ -1,0 +1,38 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "employment/work-email",
+  "version": "0.1.0",
+  "proof_type": "dkim-email",
+  "runtime": ["web-wasm", "cli"],
+  "claim": "Received a DKIM-signed email addressed only to an address at this domain, signed with the domain's own key. Proves you had (or have) an address there, without revealing which.",
+  "risk": "medium",
+  "disclose": { "mode": "exact", "output": "recipient_domain" },
+  "nullifier": {
+    "scope": "zkbadge-v1",
+    "derived_from": "pedersen(scope, length, lowercased recipient address): one claim per address"
+  },
+  "badge": { "label": "Verified employee", "icon": "briefcase", "color": "#2F5D50" },
+  "freshness": { "max_age_days": 365, "stale_after_days": 730 },
+  "maintainers": ["leonmak"],
+  "source": { "name": "zkbadge", "path": "circuits/zkbadge/src/main.nr" },
+  "changelog": "First release (badge.zeroknowledger.com and the zkbadge CLI).",
+  "tags": ["employment", "email", "career"],
+  "config": {
+    "circuit": {
+      "name": "zkbadge",
+      "noir_version": "1.0.0-beta.5",
+      "artifact_sha256": "e861d37f16646a4a7f0e5e8d790408f5dee7b613738353be74b241038c916d4a",
+      "vk_sha256": "5c9021656a11aea01b4e0b2a64bbd26152fa65164d15ad86e5373e82334d3a8e"
+    },
+    "header": { "field": "to", "max_signed_bytes": 1024 },
+    "key": { "algorithm": "rsa-sha256", "bits": 2048, "lookup": "recipient-domain" },
+    "rules": [
+      "The DKIM signature verifies over the signed headers.",
+      "Exactly one To header, holding exactly one address.",
+      "No Cc header, and the signature's h= tag lists cc (so the absence of Cc is signed).",
+      "The key is published under the recipient's own domain.",
+      "The proof is bound to a one-time code, so it can't be replayed on another link.",
+      "Bcc recipients can't be detected: use emails sent only to you."
+    ]
+  }
+}

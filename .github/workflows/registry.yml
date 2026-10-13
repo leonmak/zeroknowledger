@@ -1,0 +1,20 @@
+name: registry
+on:
+  pull_request:
+    paths: ["registry/**"]
+  push:
+    branches: [main]
+    paths: ["registry/**"]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      # schemas, versioning rules, status; on PRs also: published versions unchanged
+      - run: node registry/scripts/validate.mjs --write ${{ github.event_name == 'pull_request' && format('--base origin/{0}', github.base_ref) || '' }}
+      - name: index.json is up to date
+        run: git diff --exit-code registry/index.json || (echo "Run: npm run registry:check" && exit 1)

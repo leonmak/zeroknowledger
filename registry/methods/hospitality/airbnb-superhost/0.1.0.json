@@ -1,0 +1,57 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "hospitality/airbnb-superhost",
+  "version": "0.1.0",
+  "proof_type": "tlsn",
+  "runtime": [
+    "extension-tlsn"
+  ],
+  "claim": "Airbnb host profile indicates Superhost status.",
+  "risk": "medium",
+  "disclose": {
+    "mode": "boolean",
+    "output": "airbnb_superhost_status"
+  },
+  "badge": {
+    "label": "Airbnb Superhost",
+    "icon": "home",
+    "color": "#EF4444"
+  },
+  "freshness": {
+    "max_age_days": 30,
+    "stale_after_days": 45
+  },
+  "maintainers": [
+    "leonmak"
+  ],
+  "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+  "tags": [
+    "hospitality",
+    "trust",
+    "commerce"
+  ],
+  "config": {
+    "target": {
+      "api_url": "https://www.airbnb.com/api/v2/users/me?_format=for_roc&currency=USD",
+      "method": "GET",
+      "host": "www.airbnb.com",
+      "window_url": "https://www.airbnb.com.sg/users/profile",
+      "auth": {
+        "strategy": "cookie",
+        "intercept_filter": "https://www.airbnb.com/api/*",
+        "required_headers": [
+          "Cookie"
+        ]
+      },
+      "tls_min": "1.2"
+    },
+    "prove_params": {
+      "max_recv_data": 5000,
+      "max_sent_data": 4096,
+      "reveal_fields": [
+        "user.superhost"
+      ],
+      "notes": "Airbnb user API returns user.superhost boolean. Superhost status is evaluated quarterly. Cookie auth from airbnb.com browser session."
+    }
+  }
+}

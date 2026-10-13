@@ -1,0 +1,61 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "dev/stackoverflow-reputation-tier",
+  "version": "0.1.0",
+  "proof_type": "tlsn",
+  "runtime": [
+    "extension-tlsn"
+  ],
+  "claim": "Proves an active Stack Overflow account via profile URL in authenticated page response.",
+  "risk": "low",
+  "disclose": {
+    "mode": "presence",
+    "output": "stackoverflow_account_verified"
+  },
+  "badge": {
+    "label": "Stack Overflow Trusted",
+    "icon": "verify",
+    "color": "#F59E0B"
+  },
+  "freshness": {
+    "max_age_days": 90,
+    "stale_after_days": 120
+  },
+  "maintainers": [
+    "leonmak"
+  ],
+  "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+  "tags": [
+    "developer",
+    "knowledge",
+    "reputation"
+  ],
+  "config": {
+    "target": {
+      "api_url": "https://stackoverflow.com/",
+      "method": "GET",
+      "host": "stackoverflow.com",
+      "window_url": "https://stackoverflow.com/",
+      "auth": {
+        "strategy": "cookie",
+        "intercept_filter": "https://stackoverflow.com/",
+        "required_headers": [
+          "Cookie"
+        ],
+        "required_cookie": "_acct"
+      },
+      "tls_min": "1.2"
+    },
+    "prove_params": {
+      "max_recv_data": 50000,
+      "max_sent_data": 2000,
+      "reveal_fields": [],
+      "reveal_regex": [
+        {
+          "regex": "\"profileUrl\":\"https://stackoverflow\\.com/users/\\d+/[^\"]+\""
+        }
+      ],
+      "notes": "Proves logged-in Stack Overflow account by extracting profileUrl from the authenticated HTML response."
+    }
+  }
+}

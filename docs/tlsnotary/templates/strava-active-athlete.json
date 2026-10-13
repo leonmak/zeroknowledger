@@ -2,22 +2,29 @@
   "name": "fitness/strava-active-athlete",
   "version": "0.1.0",
   "status": "draft",
-  "claim": "Strava profile shows at least 10 activities in the last 30 days.",
+  "claim": "Strava profile shows at least one activity in the last 30 days.",
   "owner": {
     "team": "seed-library",
     "reviewed_by": "pending"
   },
   "risk": "low",
   "target": {
-    "url": "https://www.strava.com/dashboard",
-    "auth": "session",
+    "api_url": "https://www.strava.com/api/v3/athlete/activities?per_page=1",
+    "method": "GET",
+    "host": "www.strava.com",
+    "window_url": "https://www.strava.com/dashboard",
+    "auth": {
+      "strategy": "bearer",
+      "intercept_filter": "https://www.strava.com/api/v3/*",
+      "required_headers": ["Authorization"]
+    },
     "tls_min": "1.2"
   },
-  "extract": {
-    "selector": ".activity-summary, .recent-activity, [data-testid='activity-feed']",
-    "pattern": "([0-9]+)",
-    "transform": "parseInt(match[1], 10)",
-    "notes": "Use fixture transform to derive 30-day count from feed data."
+  "prove_params": {
+    "max_recv_data": 3000,
+    "max_sent_data": 1000,
+    "reveal_fields": ["0.start_date_local", "0.type"],
+    "notes": "Bearer token intercepted from Strava browser session. Returns most recent activity. Verifier checks start_date_local is within 30 days. Activity type revealed but not checked."
   },
   "disclose": {
     "mode": "threshold",
@@ -25,12 +32,6 @@
     "value": 10,
     "output": "strava_activities_30d_gte_10"
   },
-  "redact": [
-    ".athlete-name",
-    ".athlete-location",
-    ".profile-heading img",
-    ".activity-map"
-  ],
   "badge": {
     "label": "Active Athlete",
     "icon": "activity",

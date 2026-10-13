@@ -1,0 +1,44 @@
+{
+  "name": "zeroknowledger-verifier",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "observability": { "enabled": true },
+  // The registry API. The workers.dev address keeps working too (the enclave
+  // and older site builds may still use it).
+  "routes": [{ "pattern": "api.zeroknowledger.com", "custom_domain": true }],
+  "workers_dev": true,
+  // Where /bind?code=… links point (the site).
+  "vars": {
+    "SITE_URL": "https://zeroknowledger-web.leonmakansheng.workers.dev",
+    // The attested enclave (gcp/README.md) that computes person ids. Without it,
+    // unique-person badges can't be issued.
+    "ENCLAVE_URL": "https://enclave.zeroknowledger.com",
+    // The enclave VM, started on demand and stopped when idle (src/enclaveControl.ts),
+    // with the GCP_SERVICE_ACCOUNT secret (gcp/deploy.sh control).
+    "GCP_INSTANCE": "projects/zeroknowledger/zones/asia-southeast1-b/instances/zk-enclave",
+    "ENCLAVE_IMAGE_DIGESTS": "sha256:42b54d14cdf116daf50e7ad02206c3fac79f0ed9d0e3280a7ae03b11f7a12d5b",
+  },
+  // Stops the enclave VM within a minute once no proof is queued.
+  "triggers": { "crons": ["* * * * *"] },
+  "containers": [
+    {
+      "class_name": "VerifierContainer",
+      "image": "./Dockerfile",
+      // Sessions live in the server's memory, so run exactly one instance.
+      "max_instances": 1,
+      "instance_type": "basic",
+    },
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "VERIFIER", "class_name": "VerifierContainer" }],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["VerifierContainer"] }],
+  // Issued badges. Schema: migrations/.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "zeroknowledger-badges",
+      "database_id": "2ed6e288-bd4a-4a86-b18b-8cd4966c8720",
+    },
+  ],
+}

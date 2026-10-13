@@ -1,0 +1,184 @@
+[
+  {
+    "name": "income/stripe-monthly-volume",
+    "host": "dashboard.stripe.com",
+    "method": "GET",
+    "path": "/v1/reporting/reporting_runs?report_type=balance_change_from_activity.summary",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "Stripe Merchant",
+      "icon": "credit-card",
+      "color": "#22C55E"
+    }
+  },
+  {
+    "name": "income/paypal-business-verified",
+    "host": "www.paypal.com",
+    "method": "GET",
+    "path": "/api/v2/account/profile",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "PayPal Business",
+      "icon": "briefcase",
+      "color": "#0EA5E9"
+    }
+  },
+  {
+    "name": "dev/github-account-age",
+    "host": "github.com",
+    "method": "GET",
+    "path": "/",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "Established GitHub",
+      "icon": "code",
+      "color": "#10B981"
+    }
+  },
+  {
+    "name": "dev/github-contributions-90d",
+    "host": "api.github.com",
+    "method": "GET",
+    "path": "/user/repos?type=owner&sort=pushed&per_page=1",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "Active OSS Contributor",
+      "icon": "git-branch",
+      "color": "#16A34A"
+    }
+  },
+  {
+    "name": "career/linkedin-current-role",
+    "host": "www.linkedin.com",
+    "method": "GET",
+    "path": "/voyager/api/me",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "Current Professional Role",
+      "icon": "briefcase",
+      "color": "#2563EB"
+    }
+  },
+  {
+    "name": "dev/stackoverflow-reputation-tier",
+    "host": "stackoverflow.com",
+    "method": "GET",
+    "path": "/",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "Stack Overflow Trusted",
+      "icon": "verify",
+      "color": "#F59E0B"
+    }
+  },
+  {
+    "name": "credential/aws-certified-badge",
+    "host": "api.credly.com",
+    "method": "GET",
+    "path": "/v1/me/earned_badges?filter=state::accepted&page_size=1",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "AWS Certified",
+      "icon": "shield",
+      "color": "#F97316"
+    }
+  },
+  {
+    "name": "hospitality/airbnb-superhost",
+    "host": "www.airbnb.com",
+    "method": "GET",
+    "path": "/api/v2/users/me?_format=for_roc&currency=USD",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "Airbnb Superhost",
+      "icon": "home",
+      "color": "#EF4444"
+    }
+  },
+  {
+    "name": "freelance/upwork-top-rated",
+    "host": "www.upwork.com",
+    "method": "GET",
+    "path": "/ab/talent-api/v2/contractor/me/badges",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "Top Rated Freelancer",
+      "icon": "star",
+      "color": "#84CC16"
+    }
+  },
+  {
+    "name": "fitness/strava-active-athlete",
+    "host": "www.strava.com",
+    "method": "GET",
+    "path": "/api/v3/athlete/activities?per_page=1",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "Active Athlete",
+      "icon": "activity",
+      "color": "#EA580C"
+    }
+  },
+  {
+    "name": "learning/duolingo-streak-tier",
+    "host": "www.duolingo.com",
+    "method": "GET",
+    "path": "/2017-06-30/me",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "Language Streak 100+",
+      "icon": "book-open",
+      "color": "#22C55E"
+    }
+  },
+  {
+    "name": "membership/netflix-active-subscription",
+    "host": "www.netflix.com",
+    "method": "GET",
+    "path": "/nq/website/memberapi/v1/memberships",
+    "commit_fields": [],
+    "issue_when": null,
+    "badge": {
+      "label": "Netflix Member",
+      "icon": "play",
+      "color": "#DC2626"
+    }
+  },
+  {
+    "name": "identity/singpass-unique-person",
+    "host": "portal.singpass.gov.sg",
+    "method": "GET",
+    "path": "/home/api/secured/profile-update-details",
+    "commit_fields": [
+      "result.singpass_id",
+      "result.mobile_number"
+    ],
+    "issue_when": {
+      "status": 200,
+      "max_age_seconds": 600,
+      "json": {
+        "status": "SUCCESS"
+      },
+      "person_proof": {
+        "circuit": "singpass_person",
+        "scope": "singpass-person"
+      }
+    },
+    "badge": {
+      "label": "Verified Person - SG",
+      "icon": "fingerprint",
+      "color": "#9F1239"
+    }
+  }
+]

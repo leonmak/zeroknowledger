@@ -1,0 +1,6 @@
+# TLSNotary verifier config inside the enclave: every verified session goes to
+# the enclave issuer on localhost, which keeps its own copy of the commitments
+# and forwards a signed copy to the Worker.
+webhooks:
+  "*":
+    url: "http://127.0.0.1:7049/webhook"

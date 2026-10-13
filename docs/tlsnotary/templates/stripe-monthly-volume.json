@@ -9,15 +9,22 @@
   },
   "risk": "medium",
   "target": {
-    "url": "https://dashboard.stripe.com",
-    "auth": "session",
+    "api_url": "https://dashboard.stripe.com/v1/reporting/reporting_runs?report_type=balance_change_from_activity.summary",
+    "method": "GET",
+    "host": "dashboard.stripe.com",
+    "window_url": "https://dashboard.stripe.com/",
+    "auth": {
+      "strategy": "cookie",
+      "intercept_filter": "https://dashboard.stripe.com/*",
+      "required_headers": ["Cookie"]
+    },
     "tls_min": "1.2"
   },
-  "extract": {
-    "selector": "[data-testid='gross-volume'], [class*='BalanceSummary'], [class*='DashboardMetric'], .balance-value, [class*='volume']",
-    "pattern": "\\$?([0-9,]+(?:\\.[0-9]{2})?)",
-    "transform": "parseFloat(match[1].replace(/,/g, ''))",
-    "notes": "Stripe dashboard DOM changes frequently. Validate before each notarization. Test against https://dashboard.stripe.com/dashboard. Selectors ordered by stability."
+  "prove_params": {
+    "max_recv_data": 5000,
+    "max_sent_data": 4096,
+    "reveal_fields": ["data.0.result.net_volume"],
+    "notes": "Stripe dashboard internal API. Exact endpoint and response shape should be verified via DevTools on dashboard.stripe.com. Cookie auth from dashboard browser session. Large cookies require high maxSentData."
   },
   "disclose": {
     "mode": "threshold",
@@ -25,12 +32,6 @@
     "value": 10000,
     "output": "stripe_monthly_volume_gte_10000"
   },
-  "redact": [
-    "[data-testid='account-email']",
-    "[data-testid='bank-account-last4']",
-    ".UserMenu",
-    "meta[name='csrf-token']"
-  ],
   "badge": {
     "label": "Stripe Merchant",
     "icon": "credit-card",

@@ -9,26 +9,27 @@
   },
   "risk": "high",
   "target": {
-    "url": "https://www.linkedin.com/in/me",
-    "auth": "session",
+    "api_url": "https://www.linkedin.com/voyager/api/me",
+    "method": "GET",
+    "host": "www.linkedin.com",
+    "window_url": "https://www.linkedin.com/feed/",
+    "auth": {
+      "strategy": "cookie+csrf",
+      "intercept_filter": "https://www.linkedin.com/voyager/api/*",
+      "required_headers": ["Cookie", "csrf-token"]
+    },
     "tls_min": "1.2"
   },
-  "extract": {
-    "selector": "section[id*='experience-section'] h3, [data-test-id*='experience'] .pvs-entity__sub-line-top, [class*='employment'] [class*='present']",
-    "pattern": "(Present|Current|Actualmente|Actuellement|Derzeit|现在)",
-    "transform": "match[1]",
-    "notes": "LinkedIn locale variations significant. Test across en_US, es_ES, fr_FR, de_DE, zh_CN. DOM highly variable by region. Requires fixture for each locale before notarization."
+  "prove_params": {
+    "max_recv_data": 3000,
+    "max_sent_data": 4096,
+    "reveal_fields": ["miniProfile.occupation"],
+    "notes": "LinkedIn Voyager internal API. Requires both Cookie and csrf-token headers. Large session cookies require higher maxSentData. occupation field contains current title and company."
   },
   "disclose": {
     "mode": "boolean",
     "output": "linkedin_current_role_present"
   },
-  "redact": [
-    ".text-body-medium.break-words",
-    ".pv-text-details__left-panel",
-    ".inline-show-more-text",
-    "img.profile-photo-edit__preview"
-  ],
   "badge": {
     "label": "Current Professional Role",
     "icon": "briefcase",

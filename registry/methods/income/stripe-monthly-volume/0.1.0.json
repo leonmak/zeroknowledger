@@ -1,0 +1,59 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "income/stripe-monthly-volume",
+  "version": "0.1.0",
+  "proof_type": "tlsn",
+  "runtime": [
+    "extension-tlsn"
+  ],
+  "claim": "User processed at least 10000 USD in recent monthly Stripe volume.",
+  "risk": "medium",
+  "disclose": {
+    "mode": "threshold",
+    "comparison": "gte",
+    "value": 10000,
+    "output": "stripe_monthly_volume_gte_10000"
+  },
+  "badge": {
+    "label": "Stripe Merchant",
+    "icon": "credit-card",
+    "color": "#22C55E"
+  },
+  "freshness": {
+    "max_age_days": 30,
+    "stale_after_days": 45
+  },
+  "maintainers": [
+    "leonmak"
+  ],
+  "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+  "tags": [
+    "income",
+    "business",
+    "payments"
+  ],
+  "config": {
+    "target": {
+      "api_url": "https://dashboard.stripe.com/v1/reporting/reporting_runs?report_type=balance_change_from_activity.summary",
+      "method": "GET",
+      "host": "dashboard.stripe.com",
+      "window_url": "https://dashboard.stripe.com/",
+      "auth": {
+        "strategy": "cookie",
+        "intercept_filter": "https://dashboard.stripe.com/*",
+        "required_headers": [
+          "Cookie"
+        ]
+      },
+      "tls_min": "1.2"
+    },
+    "prove_params": {
+      "max_recv_data": 5000,
+      "max_sent_data": 4096,
+      "reveal_fields": [
+        "data.0.result.net_volume"
+      ],
+      "notes": "Stripe dashboard internal API. Exact endpoint and response shape should be verified via DevTools on dashboard.stripe.com. Cookie auth from dashboard browser session. Large cookies require high maxSentData."
+    }
+  }
+}

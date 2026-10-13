@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../schema/status.schema.json",
+  "id": "learning/duolingo-streak-tier",
+  "versions": {
+    "0.1.0": {
+      "health": "untested",
+      "health_note": "Seed draft: never run end to end (no verifier deployed yet).",
+      "soundness": "unreviewed"
+    }
+  }
+}

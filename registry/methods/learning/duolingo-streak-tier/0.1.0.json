@@ -1,0 +1,60 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "learning/duolingo-streak-tier",
+  "version": "0.1.0",
+  "proof_type": "tlsn",
+  "runtime": [
+    "extension-tlsn"
+  ],
+  "claim": "Duolingo streak is at least 100 days.",
+  "risk": "low",
+  "disclose": {
+    "mode": "threshold",
+    "comparison": "gte",
+    "value": 100,
+    "output": "duolingo_streak_days_gte_100"
+  },
+  "badge": {
+    "label": "Language Streak 100+",
+    "icon": "book-open",
+    "color": "#22C55E"
+  },
+  "freshness": {
+    "max_age_days": 14,
+    "stale_after_days": 21
+  },
+  "maintainers": [
+    "leonmak"
+  ],
+  "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+  "tags": [
+    "learning",
+    "consistency",
+    "achievement"
+  ],
+  "config": {
+    "target": {
+      "api_url": "https://www.duolingo.com/2017-06-30/me",
+      "method": "GET",
+      "host": "www.duolingo.com",
+      "window_url": "https://www.duolingo.com/",
+      "auth": {
+        "strategy": "cookie",
+        "intercept_filter": "https://www.duolingo.com/*",
+        "required_headers": [
+          "Cookie"
+        ]
+      },
+      "tls_min": "1.2"
+    },
+    "prove_params": {
+      "max_recv_data": 4000,
+      "max_sent_data": 2000,
+      "reveal_fields": [
+        "streak_data.current_streak.length",
+        "username"
+      ],
+      "notes": "Duolingo /2017-06-30/me returns the authenticated user profile including streak_data. Cookie may be large. username field is revealed but not used in the threshold check."
+    }
+  }
+}

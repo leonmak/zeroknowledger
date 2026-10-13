@@ -9,15 +9,22 @@
   },
   "risk": "low",
   "target": {
-    "url": "https://www.duolingo.com/profile",
-    "auth": "session",
+    "api_url": "https://www.duolingo.com/2017-06-30/me",
+    "method": "GET",
+    "host": "www.duolingo.com",
+    "window_url": "https://www.duolingo.com/",
+    "auth": {
+      "strategy": "cookie",
+      "intercept_filter": "https://www.duolingo.com/*",
+      "required_headers": ["Cookie"]
+    },
     "tls_min": "1.2"
   },
-  "extract": {
-    "selector": "[data-test='streak-value'], .streak, ._3Tq95",
-    "pattern": "([0-9]+)",
-    "transform": "parseInt(match[1], 10)",
-    "notes": "Selector likely differs by app version and locale."
+  "prove_params": {
+    "max_recv_data": 4000,
+    "max_sent_data": 2000,
+    "reveal_fields": ["streak_data.current_streak.length", "username"],
+    "notes": "Duolingo /2017-06-30/me returns the authenticated user profile including streak_data. Cookie may be large. username field is revealed but not used in the threshold check."
   },
   "disclose": {
     "mode": "threshold",
@@ -25,12 +32,6 @@
     "value": 100,
     "output": "duolingo_streak_days_gte_100"
   },
-  "redact": [
-    ".user-username",
-    ".user-fullname",
-    "img[alt='Profile Picture']",
-    ".email"
-  ],
   "badge": {
     "label": "Language Streak 100+",
     "icon": "book-open",

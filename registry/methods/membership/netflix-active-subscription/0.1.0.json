@@ -1,0 +1,58 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "membership/netflix-active-subscription",
+  "version": "0.1.0",
+  "proof_type": "tlsn",
+  "runtime": [
+    "extension-tlsn"
+  ],
+  "claim": "Netflix account has an active subscription plan.",
+  "risk": "high",
+  "disclose": {
+    "mode": "boolean",
+    "output": "netflix_subscription_active"
+  },
+  "badge": {
+    "label": "Netflix Member",
+    "icon": "play",
+    "color": "#DC2626"
+  },
+  "freshness": {
+    "max_age_days": 30,
+    "stale_after_days": 45
+  },
+  "maintainers": [
+    "leonmak"
+  ],
+  "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+  "tags": [
+    "membership",
+    "consumer",
+    "subscription"
+  ],
+  "config": {
+    "target": {
+      "api_url": "https://www.netflix.com/nq/website/memberapi/v1/memberships",
+      "method": "GET",
+      "host": "www.netflix.com",
+      "window_url": "https://www.netflix.com/YourAccount",
+      "auth": {
+        "strategy": "cookie",
+        "intercept_filter": "https://www.netflix.com/nq/*",
+        "required_headers": [
+          "Cookie"
+        ]
+      },
+      "tls_min": "1.2"
+    },
+    "prove_params": {
+      "max_recv_data": 5000,
+      "max_sent_data": 4096,
+      "reveal_fields": [
+        "membership.state",
+        "membership.planName"
+      ],
+      "notes": "Netflix member API. Exact endpoint should be verified via DevTools on netflix.com/YourAccount. Cookie auth uses NetflixId and SecureNetflixId. membership.state should be CURRENT for active subscriptions."
+    }
+  }
+}

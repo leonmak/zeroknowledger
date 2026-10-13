@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroknowledger.com/schemas/badge.schema.json",
+  "title": "zeroknowledger badge",
+  "description": "What a verifier records after checking a proof. Enough for anyone to decide whether to accept it: which exact method version made it (by content hash, so the registry can later flag it if that version is revoked), what it disclosed, and when.",
+  "type": "object",
+  "required": ["method", "disclosed", "issued_at", "proof"],
+  "properties": {
+    "method": {
+      "type": "object",
+      "required": ["id", "version", "sha256"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+/[a-z0-9-]+$" },
+        "version": { "type": "string" },
+        "sha256": { "description": "Hash of the method version (see registry/index.json).", "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "disclosed": {
+      "description": "Keyed by the method's disclose.output, e.g. { \"recipient_domain\": \"corp.com\" }.",
+      "type": "object"
+    },
+    "nullifier": {
+      "description": "Present when the method has one. Keep private server-side when the underlying identifier is guessable.",
+      "type": "string"
+    },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "proof": {
+      "type": "object",
+      "required": ["proof_type"],
+      "properties": {
+        "proof_type": { "type": "string" },
+        "ref": { "description": "Where the proof itself is stored, if it is kept.", "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

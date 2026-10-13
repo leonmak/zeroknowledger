@@ -9,21 +9,27 @@
   },
   "risk": "medium",
   "target": {
-    "url": "https://cp.certmetrics.com/amazon/en/public/verification.aspx",
-    "auth": "session",
+    "api_url": "https://api.credly.com/v1/me/earned_badges?filter=state::accepted&page_size=1",
+    "method": "GET",
+    "host": "api.credly.com",
+    "window_url": "https://www.credly.com/users/me",
+    "auth": {
+      "strategy": "bearer",
+      "intercept_filter": "https://api.credly.com/*",
+      "required_headers": ["Authorization"]
+    },
     "tls_min": "1.2"
   },
-  "extract": {
-    "selector": "table, .certification-list, .credential-card",
-    "pattern": "(AWS Certified)",
-    "transform": "match[1]",
-    "notes": "Validate against current AWS certification portal DOM."
+  "prove_params": {
+    "max_recv_data": 5000,
+    "max_sent_data": 1000,
+    "reveal_fields": ["data.0.badge_template.name", "data.0.badge_template.issuer.name"],
+    "notes": "AWS certifications are issued via Credly. Bearer token intercepted from api.credly.com requests. Filter state::accepted excludes pending or revoked badges."
   },
   "disclose": {
     "mode": "boolean",
     "output": "aws_certification_present"
   },
-  "redact": [".candidate-name", ".candidate-id", ".email", ".address"],
   "badge": {
     "label": "AWS Certified",
     "icon": "shield",

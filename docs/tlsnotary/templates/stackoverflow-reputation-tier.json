@@ -2,38 +2,41 @@
   "name": "dev/stackoverflow-reputation-tier",
   "version": "0.1.0",
   "status": "draft",
-  "claim": "Stack Overflow reputation is at least 1000.",
+  "claim": "Proves an active Stack Overflow account via profile URL in authenticated page response.",
   "owner": {
     "team": "seed-library",
     "reviewed_by": "pending"
   },
   "risk": "low",
   "target": {
-    "url": "https://stackoverflow.com/users/current",
-    "auth": "session",
+    "api_url": "https://stackoverflow.com/",
+    "method": "GET",
+    "host": "stackoverflow.com",
+    "window_url": "https://stackoverflow.com/",
+    "auth": {
+      "strategy": "cookie",
+      "intercept_filter": "https://stackoverflow.com/",
+      "required_headers": ["Cookie"],
+      "required_cookie": "_acct"
+    },
     "tls_min": "1.2"
   },
-  "extract": {
-    "selector": ".fs-title, .grid--cell.fs-headline1",
-    "pattern": "([0-9,]+)",
-    "transform": "parseInt(match[1].replace(/,/g, ''), 10)",
-    "notes": "Ensure selector still resolves on responsive layouts."
+  "prove_params": {
+    "max_recv_data": 50000,
+    "max_sent_data": 2000,
+    "reveal_fields": [],
+    "reveal_regex": [
+      { "regex": "\"profileUrl\":\"https://stackoverflow\\.com/users/\\d+/[^\"]+\"" }
+    ],
+    "notes": "Proves logged-in Stack Overflow account by extracting profileUrl from the authenticated HTML response."
   },
   "disclose": {
-    "mode": "threshold",
-    "comparison": "gte",
-    "value": 1000,
-    "output": "stackoverflow_reputation_gte_1000"
+    "mode": "presence",
+    "output": "stackoverflow_account_verified"
   },
-  "redact": [
-    ".profile-user--name",
-    ".profile-user--bio",
-    ".gravatar-wrapper-128",
-    ".js-user-header"
-  ],
   "badge": {
     "label": "Stack Overflow Trusted",
-    "icon": "chat",
+    "icon": "verify",
     "color": "#F59E0B"
   },
   "freshness": {

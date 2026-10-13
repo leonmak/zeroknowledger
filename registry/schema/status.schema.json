@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeroknowledger.com/schemas/status.schema.json",
+  "title": "zeroknowledger method status",
+  "description": "The mutable part of a method: per-version health (can users still make proofs?) and soundness (can proofs be trusted?). Health never affects badges already issued; a revoked version means its badges should not be trusted either.",
+  "type": "object",
+  "required": ["id", "versions"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+/[a-z0-9-]+$" },
+    "versions": {
+      "type": "object",
+      "propertyNames": { "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$" },
+      "additionalProperties": { "$ref": "#/$defs/versionStatus" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "versionStatus": {
+      "type": "object",
+      "required": ["health", "soundness"],
+      "properties": {
+        "health": {
+          "description": "untested: never run end to end. working / degraded (flaky) / broken: whether new proofs can be generated.",
+          "enum": ["untested", "working", "degraded", "broken"]
+        },
+        "last_checked": { "type": "string", "format": "date" },
+        "health_note": { "type": "string" },
+        "soundness": {
+          "description": "unreviewed -> reviewed -> audited, or revoked (unsafe: badges from this version should not be trusted).",
+          "enum": ["unreviewed", "reviewed", "audited", "revoked"]
+        },
+        "reviewed_by": { "type": "array", "items": { "type": "string" } },
+        "audit": { "type": "string", "description": "Link to the audit report." },
+        "revoked": {
+          "type": "object",
+          "required": ["reason", "date"],
+          "properties": {
+            "reason": { "type": "string" },
+            "date": { "type": "string", "format": "date" },
+            "advisory": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "deprecated": {
+          "description": "A better version exists. Badges from this version stay valid.",
+          "type": "object",
+          "required": ["superseded_by"],
+          "properties": {
+            "superseded_by": { "type": "string" },
+            "reason": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "soundness": { "const": "revoked" } } }, "then": { "required": ["revoked"] } },
+        { "if": { "required": ["revoked"] }, "then": { "properties": { "soundness": { "const": "revoked" } } } },
+        { "if": { "properties": { "soundness": { "const": "audited" } } }, "then": { "required": ["audit"] } },
+        { "if": { "properties": { "soundness": { "enum": ["reviewed", "audited"] } } }, "then": { "required": ["reviewed_by"] } }
+      ]
+    }
+  }
+}

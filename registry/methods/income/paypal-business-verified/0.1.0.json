@@ -1,0 +1,58 @@
+{
+  "$schema": "../../../schema/method.schema.json",
+  "id": "income/paypal-business-verified",
+  "version": "0.1.0",
+  "proof_type": "tlsn",
+  "runtime": [
+    "extension-tlsn"
+  ],
+  "claim": "User has an active PayPal business account in good standing.",
+  "risk": "medium",
+  "disclose": {
+    "mode": "boolean",
+    "output": "paypal_business_account_verified"
+  },
+  "badge": {
+    "label": "PayPal Business",
+    "icon": "briefcase",
+    "color": "#0EA5E9"
+  },
+  "freshness": {
+    "max_age_days": 60,
+    "stale_after_days": 90
+  },
+  "maintainers": [
+    "leonmak"
+  ],
+  "changelog": "Migrated from docs/tlsnotary/templates (seed library draft).",
+  "tags": [
+    "income",
+    "business",
+    "payments"
+  ],
+  "config": {
+    "target": {
+      "api_url": "https://www.paypal.com/api/v2/account/profile",
+      "method": "GET",
+      "host": "www.paypal.com",
+      "window_url": "https://www.paypal.com/businessmanage/summary",
+      "auth": {
+        "strategy": "cookie",
+        "intercept_filter": "https://www.paypal.com/api/*",
+        "required_headers": [
+          "Cookie"
+        ]
+      },
+      "tls_min": "1.2"
+    },
+    "prove_params": {
+      "max_recv_data": 3000,
+      "max_sent_data": 4096,
+      "reveal_fields": [
+        "accountType",
+        "verificationStatus"
+      ],
+      "notes": "PayPal internal API. Exact endpoint should be verified via DevTools on businessmanage/summary. Session cookies are large. If endpoint requires CSRF, change strategy to cookie+csrf."
+    }
+  }
+}

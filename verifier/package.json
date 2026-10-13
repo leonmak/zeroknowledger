@@ -1,0 +1,22 @@
+{
+  "name": "zeroknowledger-verifier",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "templates": "node scripts/templates.mjs",
+    "dev": "npm run templates && wrangler d1 migrations apply DB --local && wrangler dev",
+    "deploy": "npm run templates && wrangler d1 migrations apply DB --remote && wrangler deploy",
+    "typecheck": "npm run templates && tsc --noEmit",
+    "test": "npm run templates && node --test --experimental-strip-types --no-warnings test/*.test.ts test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@cloudflare/containers": "^0.3.7",
+    "@cloudflare/workers-types": "^5.20260930.1",
+    "@types/node": "^26.6.3",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.144.0"
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.8.0"
+  }
+}

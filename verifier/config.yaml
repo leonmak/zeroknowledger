@@ -1,0 +1,6 @@
+# Verifier server config. Every verified proof is posted to the issuer in the
+# Worker; issuer.internal is routed by the Container's outbound handler and
+# only resolves from inside the container.
+webhooks:
+  "*":
+    url: "http://issuer.internal/webhook"
