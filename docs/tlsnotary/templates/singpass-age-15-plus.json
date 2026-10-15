@@ -1,0 +1,62 @@
+{
+  "name": "identity/singpass-age-15-plus",
+  "version": "0.1.0",
+  "status": "draft",
+  "claim": "Holds a Singpass account and is 15 or older, per Singpass's own is_u15_user flag.",
+  "owner": {
+    "team": "seed-library",
+    "reviewed_by": "pending"
+  },
+  "risk": "medium",
+  "target": {
+    "api_url": "https://portal.singpass.gov.sg/home/api/secured/profile-update-details",
+    "method": "GET",
+    "host": "portal.singpass.gov.sg",
+    "window_url": "https://portal.singpass.gov.sg/home/ui/update-account/profile",
+    "auth": {
+      "strategy": "cookie",
+      "intercept_filter": "https://portal.singpass.gov.sg/home/api/*",
+      "required_headers": [
+        "Cookie"
+      ],
+      "required_cookie": "SP-PORTAL-SESSION-ID"
+    },
+    "tls_min": "1.2"
+  },
+  "prove_params": {
+    "max_recv_data": 2048,
+    "max_sent_data": 4096,
+    "reveal_fields": [
+      "status",
+      "result.is_u15_user"
+    ],
+    "notes": "Profile endpoint behind Singpass's 'Manage your Singpass account' step-up login. Only status and result.is_u15_user are revealed; the verifier checks status == SUCCESS and is_u15_user == false. singpass_id, mobile_number, email and everything else stay hidden. No commitments, no circuit."
+  },
+  "disclose": {
+    "mode": "boolean",
+    "output": "singpass_age_15_plus"
+  },
+  "issue_when": {
+    "status": 200,
+    "max_age_seconds": 600,
+    "json": {
+      "status": "SUCCESS",
+      "result.is_u15_user": false
+    }
+  },
+  "badge": {
+    "label": "Age 15+ - SG",
+    "icon": "cake",
+    "color": "#9F1239"
+  },
+  "freshness": {
+    "max_age_days": 90,
+    "stale_after_days": 180
+  },
+  "tags": [
+    "identity",
+    "government",
+    "singapore",
+    "age"
+  ]
+}

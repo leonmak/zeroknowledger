@@ -9,12 +9,16 @@ export function testDb(): D1Database {
   const dir = fileURLToPath(import.meta.resolve("../migrations/"));
   for (const f of readdirSync(dir).sort()) db.exec(readFileSync(join(dir, f), "utf8"));
   const prepare = (sql: string, params: unknown[] = []): D1PreparedStatement => {
+    // node:sqlite treats ?1 as a named parameter; D1 bind() uses positional values.
+    const args = /\?[1-9]/.test(sql)
+      ? [Object.fromEntries(params.map((value, i) => [String(i + 1), value]))]
+      : params;
     const stmt = {
       bind: (...p: unknown[]) => prepare(sql, p),
-      first: async () => (db.prepare(sql).get(...(params as never[])) as unknown) ?? null,
-      all: async () => ({ results: db.prepare(sql).all(...(params as never[])) }),
-      run: async () => ({ success: true, meta: { changes: Number(db.prepare(sql).run(...(params as never[])).changes) } }),
-      _exec: () => db.prepare(sql).run(...(params as never[])),
+      first: async () => (db.prepare(sql).get(...(args as never[])) as unknown) ?? null,
+      all: async () => ({ results: db.prepare(sql).all(...(args as never[])) }),
+      run: async () => ({ success: true, meta: { changes: Number(db.prepare(sql).run(...(args as never[])).changes) } }),
+      _exec: () => db.prepare(sql).run(...(args as never[])),
     };
     return stmt as unknown as D1PreparedStatement;
   };

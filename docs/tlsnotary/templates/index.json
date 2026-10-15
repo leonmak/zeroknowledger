@@ -2,7 +2,7 @@
   "library": "tlsnotary-seed",
   "version": "0.1.0",
   "generated_at": "2026-04-25",
-  "count": 14,
+  "count": 13,
   "templates": [
     {
       "name": "income/stripe-monthly-volume",
@@ -77,8 +77,8 @@
       "category": "membership"
     },
     {
-      "name": "identity/singpass-unique-person",
-      "file": "singpass-unique-person.json",
+      "name": "identity/singpass-age-15-plus",
+      "file": "singpass-age-15-plus.json",
       "status": "draft",
       "category": "identity"
     }

@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../schema/status.schema.json",
+  "id": "identity/singpass-age-15-plus",
+  "versions": {
+    "0.1.0": {
+      "health": "untested",
+      "last_checked": "2026-10-13",
+      "soundness": "unreviewed"
+    }
+  }
+}

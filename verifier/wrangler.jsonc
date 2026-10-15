@@ -10,6 +10,9 @@
   // Where /bind?code=… links point (the site).
   "vars": {
     "SITE_URL": "https://zeroknowledger-web.leonmakansheng.workers.dev",
+    "RETROCHAT_RETURN_URL": "https://dreamingparty.com/retro-chat/",
+    // Secret RETROCHAT_AGE_SECRET must match Retrochat ZK_AGE_SECRET.
+    "AGE_SITE_URL": "https://zeroknowledger.com",
     // The attested enclave (gcp/README.md) that computes person ids. Without it,
     // unique-person badges can't be issued.
     "ENCLAVE_URL": "https://enclave.zeroknowledger.com",

@@ -156,28 +156,22 @@
     }
   },
   {
-    "name": "identity/singpass-unique-person",
+    "name": "identity/singpass-age-15-plus",
     "host": "portal.singpass.gov.sg",
     "method": "GET",
     "path": "/home/api/secured/profile-update-details",
-    "commit_fields": [
-      "result.singpass_id",
-      "result.mobile_number"
-    ],
+    "commit_fields": [],
     "issue_when": {
       "status": 200,
       "max_age_seconds": 600,
       "json": {
-        "status": "SUCCESS"
-      },
-      "person_proof": {
-        "circuit": "singpass_person",
-        "scope": "singpass-person"
+        "status": "SUCCESS",
+        "result.is_u15_user": false
       }
     },
     "badge": {
-      "label": "Verified Person - SG",
-      "icon": "fingerprint",
+      "label": "Age 15+ - SG",
+      "icon": "cake",
       "color": "#9F1239"
     }
   }

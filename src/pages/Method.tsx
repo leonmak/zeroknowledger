@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router";
 import Nav from "../components/Nav";
 import JsonHighlight from "../components/JsonHighlight";
 import ProveButton from "../components/ProveButton";
+import AgeReturn from "../components/AgeReturn";
 import { HealthChip, SoundnessChip, Tag } from "../components/RegistryStatus";
 import NotFound from "./NotFound";
 import { getMethod, getProofType, recommended, REPO, type Method, type VersionStatus } from "../lib/registry";
@@ -186,7 +187,9 @@ export default function MethodPage() {
                 v{rec.version} is broken right now, so new proofs can&apos;t be made. Badges already issued are unaffected.
               </p>
             ) : man.proof_type === "tlsn" ? (
-              <ProveButton templateName={m.id} />
+              m.id === "identity/singpass-age-15-plus" && new URLSearchParams(location.search).has("age_request")
+                ? <AgeReturn id={new URLSearchParams(location.search).get("age_request")!} />
+                : <ProveButton templateName={m.id} />
             ) : man.proof_type === "dkim-email" ? (
               <p style={{ fontSize: 14, color: "#8b949e", lineHeight: 1.6 }}>
                 Run <code style={mono}>/verify</code> in a Discord server with the zeroknowledger bot, then drop an email
