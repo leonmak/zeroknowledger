@@ -195,8 +195,12 @@ export async function evaluate(payload: Webhook, now = Date.now()): Promise<Eval
   // The request line pins which endpoint was proved; the host comes from the
   // TLS session itself, so neither can be relabelled by the prover.
   const requestLine = revealedLine(transcript.sent);
+  // The same endpoint supports age disclosure and committed identity proofs.
+  // This chooses the rules to validate, never trusts a browser badge label.
+  const wantsPerson = !!(session.proof || session.challenge || payload.results?.some(r => typeof r.action === "object" && r.action?.kind === "HASH"));
   const template = templates.find(
-    (t) => t.host === server_name && requestLine === `${t.method} ${t.path} HTTP/1.1`,
+    (t) => t.host === server_name && requestLine === `${t.method} ${t.path} HTTP/1.1` &&
+      (!!(t.issue_when as IssueRules | null)?.person_proof === wantsPerson),
   );
   if (!template) return { ok: false, reason: `no template for ${server_name}: ${requestLine}` };
   const rules = template.issue_when as IssueRules | null;

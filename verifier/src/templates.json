@@ -174,5 +174,31 @@
       "icon": "cake",
       "color": "#9F1239"
     }
+  },
+  {
+    "name": "identity/singpass-unique-person",
+    "host": "portal.singpass.gov.sg",
+    "method": "GET",
+    "path": "/home/api/secured/profile-update-details",
+    "commit_fields": [
+      "result.singpass_id",
+      "result.mobile_number"
+    ],
+    "issue_when": {
+      "status": 200,
+      "max_age_seconds": 600,
+      "json": {
+        "status": "SUCCESS"
+      },
+      "person_proof": {
+        "circuit": "singpass_person",
+        "scope": "singpass-person"
+      }
+    },
+    "badge": {
+      "label": "Verified Person - SG",
+      "icon": "fingerprint",
+      "color": "#9F1239"
+    }
   }
 ]
