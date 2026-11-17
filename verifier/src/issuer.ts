@@ -5,6 +5,7 @@
 // here without leaving the machine. Only the container can reach it, so the
 // payload is trusted as "what the verifier saw". Everything the prover
 // controls (handler labels, session data) is treated as input to check.
+import { completeAge } from "./age.ts";
 import templates from "./templates.json" with { type: "json" };
 import { completeChallenge, type AppsEnv } from "./apps.ts";
 import { OPENCERTS_METHODS } from "./opencerts.ts";
@@ -106,6 +107,9 @@ export async function issue(payload: Webhook, env: IssueEnv, now = Date.now()): 
   }
   if (payload.session.challenge) return { ok: false, reason: "linking an app account needs a unique-person proof" };
 
+  if (payload.session.age_request && !(await completeAge(env.DB, payload.session.age_request, template.name, provedAt, now))) {
+    return { ok: false, reason: "age authorization expired, used, or does not match this proof" };
+  }
   await upsertBadge(env.DB, holder, template.name, now, provedAt, payload.session.id);
   return { ok: true, template: template.name, holder };
 }

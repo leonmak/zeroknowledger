@@ -34,7 +34,8 @@ export default function UnlockClaimPage() {
   const type = searchParams.get("type") ?? "perks";
   const title = searchParams.get("title") ?? undefined;
   const desc = searchParams.get("desc") ?? undefined;
-  const claimUrl = searchParams.get("url") ?? undefined;
+  const example = searchParams.get("example") === "1";
+  const claimUrl = example ? null : searchParams.get("url");
 
   const typeMeta = TYPE_META[type] ?? TYPE_META.perks;
   const isValid = Boolean(badge && title);
@@ -256,7 +257,7 @@ export default function UnlockClaimPage() {
                     padding: "13px 20px",
                   }}
                 >
-                  No claim URL provided
+                  {example ? "Example preview only" : "No claim URL provided"}
                 </div>
               )}
             </div>
@@ -271,7 +272,7 @@ export default function UnlockClaimPage() {
               }}
             >
               <h2 style={{ fontSize: 14, marginBottom: 12, marginTop: 0 }}>
-                How to claim
+                {claimUrl ? "How to claim" : "How badge eligibility works"}
               </h2>
               <ol
                 style={{
@@ -297,11 +298,13 @@ export default function UnlockClaimPage() {
                   The proof cryptographically confirms eligibility without
                   revealing your raw account data.
                 </li>
-                <li>
-                  Click{" "}
-                  <strong style={{ color: "#e6edf3" }}>Claim reward</strong>{" "}
-                  above and present your proof at the destination.
-                </li>
+                {claimUrl && (
+                  <li>
+                    Click{" "}
+                    <strong style={{ color: "#e6edf3" }}>Claim reward</strong>{" "}
+                    above and present your proof at the destination.
+                  </li>
+                )}
               </ol>
               <div
                 style={{

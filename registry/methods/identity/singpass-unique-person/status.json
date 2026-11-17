@@ -3,9 +3,9 @@
   "id": "identity/singpass-unique-person",
   "versions": {
     "0.1.0": {
-      "health": "working",
-      "last_checked": "2026-10-01",
-      "health_note": "Works end to end with the enclave verifier (MPC-TLS) and the TLSNotary extension build that returns commitment openings. Needs Singpass's extra 'Manage your Singpass account' login first, so the profile is on screen before you click Generate Proof.",
+      "health": "broken",
+      "last_checked": "2026-10-16",
+      "health_note": "Turned off: it needs a TLSNotary extension build that returns commitment openings, which isn't available. The verifier no longer has its template, so it can't issue this badge.",
       "soundness": "unreviewed"
     }
   }

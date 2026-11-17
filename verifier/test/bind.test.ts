@@ -1,3 +1,5 @@
+// Singpass unique-person is turned off (it needs a TLSNotary extension build that returns
+// commitment openings, which we can't ship); its tests are skipped until it comes back.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { handleAppsRequest } from "../src/apps.ts";
@@ -119,7 +121,7 @@ test("app API needs that app's key", async () => {
   assert.equal((await t.call("POST", "/apps/discord:1/challenges", { subject: "u" }, "zk_wrong")).status, 401);
 });
 
-test("a unique-person proof completes the challenge and binds the subject", async () => {
+test.skip("a unique-person proof completes the challenge and binds the subject", async () => {
   const t = setup();
   const key = await t.register("discord:1");
   const code = await t.challenge("discord:1", key, "user:alice");
@@ -135,7 +137,7 @@ test("a unique-person proof completes the challenge and binds the subject", asyn
   assert.equal(appView.body.pairwise_id, sub.body.pairwise_id);
 });
 
-test("moving to another subject needs confirmation and unbinds the old one", async () => {
+test.skip("moving to another subject needs confirmation and unbinds the old one", async () => {
   const t = setup();
   const key = await t.register("discord:1", { cooldown_days: 0 });
   await t.provePerson({ challenge: await t.challenge("discord:1", key, "user:alice") });
@@ -156,7 +158,7 @@ test("moving to another subject needs confirmation and unbinds the old one", asy
   assert.equal(t.dump().bindings.length, 1);
 });
 
-test("moves are blocked during the app's cooldown", async () => {
+test.skip("moves are blocked during the app's cooldown", async () => {
   const t = setup();
   const key = await t.register("discord:1"); // default 30 days
   await t.provePerson({ challenge: await t.challenge("discord:1", key, "user:alice") });
@@ -167,7 +169,7 @@ test("moves are blocked during the app's cooldown", async () => {
   assert.match(s.reason as string, /already linked to another account here; it can move after/);
 });
 
-test("a subject proved by a different person replaces the old person", async () => {
+test.skip("a subject proved by a different person replaces the old person", async () => {
   const t = setup();
   const key = await t.register("discord:1");
   await t.provePerson({ challenge: await t.challenge("discord:1", key, "user:shared") });
@@ -178,7 +180,7 @@ test("a subject proved by a different person replaces the old person", async () 
   assert.equal(t.dump().bindings.length, 1);
 });
 
-test("one person can link one account in each app, with unlinkable ids", async () => {
+test.skip("one person can link one account in each app, with unlinkable ids", async () => {
   const t = setup();
   const k1 = await t.register("discord:1");
   const k2 = await t.register("discord:2");
@@ -193,7 +195,7 @@ test("one person can link one account in each app, with unlinkable ids", async (
   assert.equal(new Set(persons).size, 2);
 });
 
-test("a proof made for one app can't link an account in another", async () => {
+test.skip("a proof made for one app can't link an account in another", async () => {
   const t = setup();
   const k1 = await t.register("discord:1");
   await t.register("discord:2");
@@ -204,7 +206,7 @@ test("a proof made for one app can't link an account in another", async () => {
   assert.deepEqual(none, { ok: false, reason: "proof was made for a different app" });
 });
 
-test("expired and reused challenges are rejected", async () => {
+test.skip("expired and reused challenges are rejected", async () => {
   const t = setup();
   const key = await t.register("discord:1");
   const code = await t.challenge("discord:1", key, "user:alice");
@@ -217,7 +219,7 @@ test("expired and reused challenges are rejected", async () => {
   assert.equal(again.ok && again.challenge, "rejected");
 });
 
-test("a person proof must be for the commitments the verifier saw", async () => {
+test.skip("a person proof must be for the commitments the verifier saw", async () => {
   const t = setup();
   const proofId = "p".repeat(20);
   await issue(profileWebhook({ proof: proofId }), t.env);
@@ -230,7 +232,7 @@ test("a person proof must be for the commitments the verifier saw", async () => 
   assert.equal(t.dump().badges.length, 0);
 });
 
-test("an enclave refusal issues nothing", async () => {
+test.skip("an enclave refusal issues nothing", async () => {
   const t = setup();
   t.setRefuse(true);
   const out = await t.provePerson({});
@@ -238,7 +240,7 @@ test("an enclave refusal issues nothing", async () => {
   assert.equal(t.dump().badges.length, 0);
 });
 
-test("the TLS proof needs a proof id and exactly two commitments", async () => {
+test.skip("the TLS proof needs a proof id and exactly two commitments", async () => {
   const t = setup();
   assert.deepEqual(await issue(profileWebhook({}), t.env), { ok: false, reason: "no proof id in session data" });
   const w = profileWebhook({ proof: "q".repeat(20) });
@@ -246,7 +248,7 @@ test("the TLS proof needs a proof id and exactly two commitments", async () => {
   assert.deepEqual(await issue(w, t.env), { ok: false, reason: "expected 2 hash commitments (result.singpass_id, result.mobile_number)" });
 });
 
-test("a new mobile number counts as a new person (documented trade-off)", async () => {
+test.skip("a new mobile number counts as a new person (documented trade-off)", async () => {
   const t = setup();
   const key = await t.register("discord:1");
   await t.provePerson({ challenge: await t.challenge("discord:1", key, "user:alice") });
@@ -255,7 +257,7 @@ test("a new mobile number counts as a new person (documented trade-off)", async 
   assert.equal(out.ok && out.challenge, "completed"); // not "needs_confirmation"
 });
 
-test("webhooks are signed and report unbound then bound on a move", async () => {
+test.skip("webhooks are signed and report unbound then bound on a move", async () => {
   const t = setup();
   const events: { body: string; sig: string | null }[] = [];
   const realFetch = globalThis.fetch;
@@ -279,7 +281,7 @@ test("webhooks are signed and report unbound then bound on a move", async () => 
   for (const e of events) assert.equal(e.sig, `sha256=${await hmacHex(secret, e.body)}`);
 });
 
-test("neither NRIC nor mobile ever reaches the issuer", async () => {
+test.skip("neither NRIC nor mobile ever reaches the issuer", async () => {
   const t = setup();
   const key = await t.register("discord:1");
   const proofId = "r".repeat(20);
@@ -292,7 +294,7 @@ test("neither NRIC nor mobile ever reaches the issuer", async () => {
   assert.doesNotMatch(JSON.stringify(t.dump()), /S1234567D|91234567/);
 });
 
-test("an unreachable enclave is retryable and keeps the pending proof", async () => {
+test.skip("an unreachable enclave is retryable and keeps the pending proof", async () => {
   const t = setup();
   const proofId = "u".repeat(20);
   await issue(profileWebhook({ proof: proofId }), t.env);
@@ -303,7 +305,7 @@ test("an unreachable enclave is retryable and keeps the pending proof", async ()
   assert.equal(second.ok, true);
 });
 
-test("only a sealed person proof is accepted, relayed unopened, and only with an enclave", async () => {
+test.skip("only a sealed person proof is accepted, relayed unopened, and only with an enclave", async () => {
   const t = setup();
   const seen: unknown[] = [];
   const enclave = { ...t.env, derivePerson: async (req: PersonRequest) => (seen.push(req), { person: "ab".repeat(32) }) };
@@ -325,7 +327,7 @@ test("only a sealed person proof is accepted, relayed unopened, and only with an
   assert.equal((none as { reason: string }).reason, "unique-person proofs need the enclave");
 });
 
-test("a public verify link confirms the app-specific id, and nothing else", async () => {
+test.skip("a public verify link confirms the app-specific id, and nothing else", async () => {
   const t = setup();
   const key = await t.register("discord:1");
   await t.provePerson({ challenge: await t.challenge("discord:1", key, "user:alice") });

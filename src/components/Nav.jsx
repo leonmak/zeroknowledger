@@ -118,6 +118,7 @@ export default function Nav({ activeTab = "/" }) {
           </Link>
         </div>
       </div>
+      <Link to="/developers/email-zkp" className="nav-link" style={{ fontSize: 14, ...activeStyle("/developers") }}>Developers</Link>
     </nav>
   );
 }

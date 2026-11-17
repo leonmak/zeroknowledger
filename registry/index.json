@@ -789,15 +789,105 @@
       }
     },
     {
+      "id": "identity/singpass-age-15-plus",
+      "latest": "0.1.0",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sha256": "fcbb2de4142547e3ed5732c5c17c4cce8f27bc31e5753d96c6a47712200431ed",
+          "health": "untested",
+          "last_checked": "2026-10-13",
+          "soundness": "unreviewed"
+        }
+      ],
+      "manifest": {
+        "$schema": "../../../schema/method.schema.json",
+        "id": "identity/singpass-age-15-plus",
+        "version": "0.1.0",
+        "proof_type": "tlsn",
+        "runtime": [
+          "extension-tlsn"
+        ],
+        "claim": "Holds a Singpass account and is 15 or older, per Singpass's own is_u15_user flag.",
+        "risk": "medium",
+        "disclose": {
+          "mode": "boolean",
+          "output": "singpass_age_15_plus"
+        },
+        "privacy": {
+          "summary": "Only Singpass's yes/no 'under 15' flag and the request status are revealed. Your NRIC/FIN, mobile, email and everything else in the response stay hidden.",
+          "guarantees": [
+            "The flag is bound to a real TLS session with portal.singpass.gov.sg (MPC-TLS), so it can't be edited.",
+            "All other bytes of the response are redacted before the verifier sees them."
+          ],
+          "limits": [
+            "Only proves 15 or older; Singpass exposes no other age threshold here.",
+            "No uniqueness: the same person can earn this badge on any number of holders.",
+            "Not reviewed or audited yet."
+          ],
+          "trust": [
+            "The TLSNotary verifier.",
+            "The browser extension and the site code you load.",
+            "Singpass's response is what the badge is based on; Singpass isn't involved and doesn't endorse it."
+          ]
+        },
+        "badge": {
+          "label": "Age 15+ - SG",
+          "icon": "cake",
+          "color": "#9F1239"
+        },
+        "freshness": {
+          "max_age_days": 90,
+          "stale_after_days": 180
+        },
+        "maintainers": [
+          "leonmak"
+        ],
+        "changelog": "First release: reveals Singpass's is_u15_user flag; no commitments or circuit.",
+        "tags": [
+          "identity",
+          "government",
+          "singapore",
+          "age"
+        ],
+        "config": {
+          "target": {
+            "api_url": "https://portal.singpass.gov.sg/home/api/secured/profile-update-details",
+            "method": "GET",
+            "host": "portal.singpass.gov.sg",
+            "window_url": "https://portal.singpass.gov.sg/home/ui/update-account/profile",
+            "auth": {
+              "strategy": "cookie",
+              "intercept_filter": "https://portal.singpass.gov.sg/home/api/*",
+              "required_headers": [
+                "Cookie"
+              ],
+              "required_cookie": "SP-PORTAL-SESSION-ID"
+            },
+            "tls_min": "1.2"
+          },
+          "prove_params": {
+            "max_recv_data": 2048,
+            "max_sent_data": 4096,
+            "reveal_fields": [
+              "status",
+              "result.is_u15_user"
+            ],
+            "notes": "Profile endpoint behind Singpass's 'Manage your Singpass account' step-up login. Only status and result.is_u15_user are revealed; the verifier checks status == SUCCESS and is_u15_user == false. singpass_id, mobile_number, email and everything else stay hidden. No commitments, no circuit."
+          }
+        }
+      }
+    },
+    {
       "id": "identity/singpass-unique-person",
       "latest": "0.1.0",
       "versions": [
         {
           "version": "0.1.0",
           "sha256": "22298396758760a8a013a5a4663e1a5cf67749bc0cecf26e4bf08ea9cf3b6b75",
-          "health": "working",
-          "last_checked": "2026-10-01",
-          "health_note": "Works end to end with the enclave verifier (MPC-TLS) and the TLSNotary extension build that returns commitment openings. Needs Singpass's extra 'Manage your Singpass account' login first, so the profile is on screen before you click Generate Proof.",
+          "health": "broken",
+          "last_checked": "2026-10-16",
+          "health_note": "Turned off: it needs a TLSNotary extension build that returns commitment openings, which isn't available. The verifier no longer has its template, so it can't issue this badge.",
           "soundness": "unreviewed"
         }
       ],

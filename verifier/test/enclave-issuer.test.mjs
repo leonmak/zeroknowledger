@@ -1,3 +1,5 @@
+// Singpass unique-person is turned off (it needs a TLSNotary extension build that returns
+// commitment openings, which we can't ship); its tests are skipped until it comes back.
 // Runs the real enclave issuer (gcp/enclave/issuer.mjs) against fakes of
 // Google's STS/KMS/GCS, the Confidential Space launcher socket, and the Worker,
 // with the singpass_person circuit's real fixture proof.
@@ -265,7 +267,7 @@ test("forwards verified sessions to the Worker, signed", async () => {
 });
 
 let firstPerson;
-test("computes a signed person id for a proof of its own session, once", async () => {
+test.skip("computes a signed person id for a proof of its own session, once", async () => {
   const { raw } = await attestationKey();
   const out = await person("proof-aaaaaaaaaaaaaaaa");
   assert.equal(out.body.ok, true, out.raw);
@@ -276,7 +278,7 @@ test("computes a signed person id for a proof of its own session, once", async (
   assert.equal(again.body.ok, false);
 });
 
-test("refuses proofs for sessions it didn't verify (no guessing oracle)", async () => {
+test.skip("refuses proofs for sessions it didn't verify (no guessing oracle)", async () => {
   assert.equal((await person("never-seen-proof-id")).body.ok, false);
   await webhook("proof-bbbbbbbbbbbbbbbb", "evil.example"); // not an allowed host
   assert.equal((await person("proof-bbbbbbbbbbbbbbbb")).body.ok, false);
@@ -301,7 +303,7 @@ test("refuses proofs for sessions it didn't verify (no guessing oracle)", async 
   assert.equal(bad.body.reason, "person proof did not verify");
 });
 
-test("pins each pending proof to the authenticated template's circuit and scope", async () => {
+test.skip("pins each pending proof to the authenticated template's circuit and scope", async () => {
   await webhook("proof-ruleaaaaaaaaaaaa");
   const wrongCircuit = await person("proof-ruleaaaaaaaaaaaa", undefined, {
     circuit: "other_circuit",
@@ -317,7 +319,7 @@ test("pins each pending proof to the authenticated template's circuit and scope"
   assert.equal(wrongScope.body.reason, "proof uses a different identity rule");
 });
 
-test("only takes proofs sealed to it, for this proof id", async () => {
+test.skip("only takes proofs sealed to it, for this proof id", async () => {
   await webhook("proof-eeeeeeeeeeeeeeee");
   const plain = await person("proof-eeeeeeeeeeeeeeee", PROOF);
   assert.equal(plain.body.reason, "person proof must be sealed to the enclave");
@@ -328,7 +330,7 @@ test("only takes proofs sealed to it, for this proof id", async () => {
   assert.match(replayed.body.reason, /couldn't open the sealed person proof/);
 });
 
-test("person ids are per app, taken from its own session", async () => {
+test.skip("person ids are per app, taken from its own session", async () => {
   const id = async (proof, app) => (
     await webhook(proof, undefined, undefined, app),
     (await person(proof)).body

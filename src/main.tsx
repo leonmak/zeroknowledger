@@ -17,6 +17,8 @@ import Privacy from "./pages/Privacy";
 import Verified from "./pages/Verified";
 import NotFound from "./pages/NotFound";
 import OpenCerts from "./pages/OpenCerts";
+import EmailIntegration from "./pages/EmailIntegration";
+import CompanyVerification from "./pages/CompanyVerification";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -27,6 +29,8 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/cases" element={<Cases />} />
         <Route path="/cases/:handle" element={<Case />} />
         <Route path="/methods" element={<Methods />} />
+        <Route path="/developers/email-zkp" element={<EmailIntegration />} />
+        <Route path="/company/:company" element={<CompanyVerification />} />
         <Route path="/methods/:namespace/:name" element={<Method />} />
         <Route path="/unlocks" element={<Unlocks />} />
         <Route path="/unlocks/:handle" element={<Unlock />} />

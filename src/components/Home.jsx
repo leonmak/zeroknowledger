@@ -6,6 +6,7 @@ import Counter from "./Counter";
 import FadeIn from "./FadeIn";
 import TypeIcon from "./TypeIcon";
 import Nav from "./Nav";
+import { REPO } from "../lib/registry";
 
 import {
   PROFILE_BADGES,
@@ -16,11 +17,8 @@ import {
 } from "../data/home";
 
 export default function ZeroKnowledger() {
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
-  const [hovered, setHovered] = useState(null);
   const [activeUnlock, setActiveUnlock] = useState(0);
 
   const filtered = METHODS.filter((m) => {
@@ -473,15 +471,7 @@ export default function ZeroKnowledger() {
                   gridTemplateColumns: "100px 1fr auto",
                   alignItems: "center",
                   gap: 16,
-                  transition: "background 0.15s",
-                  cursor: "pointer",
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#161b22")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
               >
                 <span
                   style={{ fontWeight: 700, fontSize: 14, color: "#e6edf3" }}
@@ -527,18 +517,19 @@ export default function ZeroKnowledger() {
           >
             <div>
               <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
-                Run offers for badge holders
+                Explore work-email verification
               </div>
               <div style={{ color: "#8b949e", fontSize: 13 }}>
-                Reach verified audiences. No PII exchanged. Users opt in.
+                See how an app can verify access to a company mailbox.
               </div>
             </div>
-            <button
-              className="btn2"
+            <Link
+              to="/developers/email-zkp"
+              className="btn2 btn-link"
               style={{ borderRadius: 6, fontSize: 13, whiteSpace: "nowrap" }}
             >
-              Business API docs →
-            </button>
+              Developer guide →
+            </Link>
           </div>
         </FadeIn>
       </section>
@@ -754,11 +745,7 @@ export default function ZeroKnowledger() {
         >
           {filtered.map((m, i) => (
             <FadeIn key={m.id} delay={i * 40}>
-              <div
-                className="mc"
-                onMouseEnter={() => setHovered(m.id)}
-                onMouseLeave={() => setHovered(null)}
-              >
+              <div className="mc">
                 <div style={{ marginBottom: 12 }}>
                   <Badge {...m.badge} size="sm" />
                 </div>
@@ -767,8 +754,7 @@ export default function ZeroKnowledger() {
                     fontFamily: "'JetBrains Mono'",
                     fontSize: 14,
                     fontWeight: 600,
-                    color: hovered === m.id ? "#7ee787" : "#e6edf3",
-                    transition: "color 0.15s",
+                    color: "#e6edf3",
                     marginBottom: 6,
                   }}
                 >
@@ -849,9 +835,9 @@ export default function ZeroKnowledger() {
 
         <FadeIn delay={200}>
           <div style={{ textAlign: "center", marginTop: 32 }}>
-            <button className="btn2" style={{ borderRadius: 8 }}>
-              View all 847 methods →
-            </button>
+            <Link to="/methods" className="btn2 btn-link" style={{ borderRadius: 8 }}>
+              Browse the method registry →
+            </Link>
           </div>
         </FadeIn>
       </section>
@@ -1154,54 +1140,11 @@ export default function ZeroKnowledger() {
             What will you prove?
           </h2>
           <p style={{ color: "#8b949e", fontSize: 16, marginBottom: 40 }}>
-            Get your first badge or contribute a verification method.
+            Browse badges and see how to earn them.
           </p>
-          {!submitted ? (
-            <div style={{ display: "flex", gap: 0, justifyContent: "center" }}>
-              <input
-                className="ei"
-                type="email"
-                placeholder="you@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && email.includes("@") && setSubmitted(true)
-                }
-              />
-              <button
-                className="btn1"
-                onClick={() => email.includes("@") && setSubmitted(true)}
-              >
-                Join early access
-              </button>
-            </div>
-          ) : (
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "14px 28px",
-                borderRadius: 8,
-                border: "1px solid #7ee78744",
-                color: "#7ee787",
-                background: "rgba(126,231,135,0.05)",
-                fontSize: 14,
-                fontWeight: 600,
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M13.5 4.5L6.5 11.5L2.5 7.5"
-                  stroke="#7ee787"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              You are in. We will send your invite soon.
-            </div>
-          )}
+          <Link to="/badges" className="btn1 btn-link" style={{ borderRadius: 8 }}>
+            Browse badges →
+          </Link>
           <div
             style={{
               display: "flex",
@@ -1250,14 +1193,9 @@ export default function ZeroKnowledger() {
           </div>
           <span style={{ fontWeight: 700, fontSize: 13 }}>zeroknowledger</span>
         </div>
-        <div
-          style={{ display: "flex", gap: 20, fontSize: 13, color: "#30363d" }}
-        >
-          <span>GitHub</span>
-          <span>Twitter</span>
-          <span>Discord</span>
-          <span>Blog</span>
-        </div>
+        <a className="nav-link" href={REPO} style={{ fontSize: 13, color: "#8b949e" }}>
+          GitHub
+        </a>
         <span style={{ fontSize: 11, color: "#1f2937" }}>© 2026</span>
       </footer>
     </div>

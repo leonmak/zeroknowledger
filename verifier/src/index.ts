@@ -12,11 +12,12 @@ import { handleOpenCerts } from "./opencerts.ts";
 import { dequeue, handleWake, sweep } from "./enclaveControl.ts";
 import { handleDemo } from "./demo.ts";
 import { gceCompute, type GcpEnv } from "./gcp.ts";
+import { handleAge, type AgeEnv } from "./age.ts";
 import templates from "./templates.json" with { type: "json" };
 
 export { ContainerProxy };
 
-interface Env extends AppsEnv, EnclaveEnv, GcpEnv {
+interface Env extends AppsEnv, EnclaveEnv, GcpEnv, AgeEnv {
   VERIFIER: DurableObjectNamespace<VerifierContainer>;
 }
 
@@ -53,6 +54,9 @@ const VERIFIER_ROUTES = new Set(["/health", "/info", "/session", "/verifier"]);
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const { pathname } = new URL(request.url);
+
+    const ageResponse = await handleAge(request, env);
+    if (ageResponse) return ageResponse;
 
     // Your own badges: only with your holder secret. There's deliberately no
     // public lookup by holder id, which would let anyone who saw the id list them.

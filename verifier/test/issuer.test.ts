@@ -7,15 +7,15 @@ const hidden = (s: string) => "\0".repeat(s.length);
 
 const NOW = Date.parse("Wed, 30 Sep 2026 06:00:00 GMT");
 
-const COMMITMENTS = ["aa".repeat(32), "bb".repeat(32)];
 const PROFILE = "GET /home/api/secured/profile-update-details HTTP/1.1";
 
-/** The verifier's webhook for Singpass's profile response: status revealed, NRIC and mobile only committed. */
+/** The verifier's webhook for Singpass's profile response: only status and is_u15_user revealed. */
 function singpass({
   requestLine = PROFILE,
   statusLine = "HTTP/1.1 200 OK",
   date = "Wed, 30 Sep 2026 05:58:00 GMT",
   status = "SUCCESS",
+  u15 = false,
   holder = "browser-secret" as string | undefined,
   server = "portal.singpass.gov.sg",
 } = {}): Webhook {
@@ -28,16 +28,22 @@ function singpass({
     `${statusLine}\r\n` +
     hidden("content-type: application/json\r\n") +
     `date: ${date}\r\n` +
-    hidden('\r\n{"result":{"singpass_id":"S1234567D","mobile_number":"91234567"},') +
+    hidden('\r\n{"result":{"singpass_id":"S1234567D",') +
+    `"is_u15_user":${u15}` +
+    hidden(',"mobile_number":"91234567"},') +
     `"status":"${status}"}`;
-  const results = COMMITMENTS.map((value) => ({ type: "RECV", part: "BODY", action: { kind: "HASH" }, value }));
-  return { server_name: server, session: { id: "s1", holder, proof: "p".repeat(20) }, transcript: { sent, recv }, results };
+  return { server_name: server, session: { id: "s1", holder }, transcript: { sent, recv } };
 }
 
-test("accepts a fresh profile proof and keeps only the commitments", async () => {
+test("accepts a fresh profile proof from someone 15 or older", async () => {
   const result = await evaluate(singpass(), NOW);
   assert.equal(result.ok, true, JSON.stringify(result));
-  assert.deepEqual((result as { commitments: string[] }).commitments.slice().sort(), COMMITMENTS);
+  assert.equal((result as { template: { name: string } }).template.name, "identity/singpass-age-15-plus");
+});
+
+test("rejects someone under 15", async () => {
+  const result = await evaluate(singpass({ u15: true }), NOW);
+  assert.equal(result.ok, false);
 });
 
 test("rejects an unsuccessful response", async () => {

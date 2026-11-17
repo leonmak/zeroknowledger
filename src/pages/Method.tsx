@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router";
 import Nav from "../components/Nav";
 import JsonHighlight from "../components/JsonHighlight";
 import ProveButton from "../components/ProveButton";
+import AgeReturn from "../components/AgeReturn";
 import { HealthChip, SoundnessChip, Tag } from "../components/RegistryStatus";
 import NotFound from "./NotFound";
 import { getMethod, getProofType, recommended, REPO, type Method, type VersionStatus } from "../lib/registry";
@@ -41,11 +42,6 @@ function PrivacyList({ title, items, mark, color }: { title: string; items: stri
       </ul>
     </div>
   );
-}
-
-function issueUrl(template: string, title: string, fields: Record<string, string>) {
-  const qs = new URLSearchParams({ template, title, ...fields });
-  return `${REPO}/issues/new?${qs}`;
 }
 
 function VersionRow({ v, latest }: { v: VersionStatus; latest: boolean }) {
@@ -99,7 +95,7 @@ export default function MethodPage() {
   const man = m.manifest;
   const rec = recommended(m);
   const type = getProofType(man.proof_type);
-  const dir = `${REPO}/tree/main/registry/methods/${m.id}`;
+  const feedback = new URLSearchParams({ title: `Method feedback: ${m.id}@${m.latest}` });
 
   return (
     <main style={{ minHeight: "100vh", background: "#0d1117", color: "#e6edf3", fontFamily: "Inter, sans-serif" }}>
@@ -186,7 +182,9 @@ export default function MethodPage() {
                 v{rec.version} is broken right now, so new proofs can&apos;t be made. Badges already issued are unaffected.
               </p>
             ) : man.proof_type === "tlsn" ? (
-              <ProveButton templateName={m.id} />
+              m.id === "identity/singpass-age-15-plus" && new URLSearchParams(location.search).has("age_request")
+                ? <AgeReturn id={new URLSearchParams(location.search).get("age_request")!} />
+                : <ProveButton templateName={m.id} />
             ) : man.proof_type === "dkim-email" ? (
               <p style={{ fontSize: 14, color: "#8b949e", lineHeight: 1.6 }}>
                 Run <code style={mono}>/verify</code> in a Discord server with the zeroknowledger bot, then drop an email
@@ -204,18 +202,9 @@ export default function MethodPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
               <a
                 className="nav-link"
-                href={issueUrl("method-broken.yml", `[broken] ${m.id}@${m.latest}`, { method: `${m.id}@${m.latest}` })}
+                href={`${REPO}/issues/new?${feedback}`}
               >
-                Report it broken or flaky →
-              </a>
-              <a
-                className="nav-link"
-                href={issueUrl("better-version.yml", `[deprecate] ${m.id}@${m.latest}`, { method: `${m.id}@${m.latest}` })}
-              >
-                Suggest a better version →
-              </a>
-              <a className="nav-link" href={dir}>
-                Publish a fix as a new version →
+                Report a problem or suggest an improvement →
               </a>
               <a className="nav-link" href={`${REPO}/security/advisories/new`} style={{ color: "#f85149" }}>
                 It can prove something false: report privately →

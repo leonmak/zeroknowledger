@@ -46,8 +46,8 @@ export default function MethodsPage() {
           Each method is versioned JSON maintained through pull requests. <strong style={{ color: "#e6edf3" }}>Health</strong>{" "}
           says whether new proofs can be made today; <strong style={{ color: "#e6edf3" }}>soundness</strong> says whether
           proofs from a version can be trusted.{" "}
-          <a href={`${REPO}/tree/main/registry`} className="nav-link" style={{ color: "#7ee787" }}>
-            Contribute a method →
+          <a href={`${REPO}/issues`} className="nav-link" style={{ color: "#7ee787" }}>
+            Discuss a method on GitHub →
           </a>
         </p>
       </section>

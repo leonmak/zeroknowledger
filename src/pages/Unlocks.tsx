@@ -35,7 +35,6 @@ const EXAMPLE_UNLOCKS = [
     type: "defi",
     title: "Undercollateralized USDC loan",
     desc: "Prove $10k+ monthly Stripe revenue to borrow USDC without locking up assets.",
-    claimUrl: "https://3jane.xyz/borrow",
   },
   {
     handle: "devdao",
@@ -44,7 +43,6 @@ const EXAMPLE_UNLOCKS = [
     type: "access",
     title: "DevDAO membership",
     desc: "Accounts older than 1 year get free entry to the developer DAO.",
-    claimUrl: "https://devdao.xyz/join",
   },
   {
     handle: "awspartner",
@@ -53,7 +51,6 @@ const EXAMPLE_UNLOCKS = [
     type: "perks",
     title: "AWS partner credits",
     desc: "$500 in AWS credits for verified certification holders building on AWS.",
-    claimUrl: "https://aws.amazon.com/partners",
   },
 ];
 
@@ -338,7 +335,7 @@ export default function UnlocksIndexPage() {
               marginBottom: 16,
             }}
           >
-            Example unlocks
+            Example unlock previews
           </h2>
           <div
             style={{
@@ -350,7 +347,7 @@ export default function UnlocksIndexPage() {
             {EXAMPLE_UNLOCKS.map((u) => (
               <Link
                 key={u.handle}
-                to={`/unlocks/${u.handle}?badge=${encodeURIComponent(u.requiredBadge)}&type=${u.type}&title=${encodeURIComponent(u.title)}&desc=${encodeURIComponent(u.desc)}&url=${encodeURIComponent(u.claimUrl)}`}
+                to={`/unlocks/${u.handle}?${new URLSearchParams({ badge: u.requiredBadge, type: u.type, title: u.title, desc: u.desc, example: "1" })}`}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <article
@@ -413,7 +410,7 @@ export default function UnlocksIndexPage() {
                     {u.desc}
                   </div>
                   <div style={{ fontSize: 11, color: "#556070" }}>
-                    by @{u.handle}
+                    View preview →
                   </div>
                 </article>
               </Link>

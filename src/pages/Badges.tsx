@@ -1,14 +1,20 @@
 import { Link } from "react-router";
 import Nav from "../components/Nav";
 import ProveButton from "../components/ProveButton";
+import { getMethod } from "../lib/registry";
 import { hostOf, templates, type Template } from "../lib/templates";
 
 type BadgeCard = {
-  rank: number;
-  activity: number;
+  id: string;
+  badge: Template["badge"];
+  claim: string;
   category: string;
-  template: Template;
-};
+  risk?: Template["risk"];
+  source: string;
+} & (
+  | { kind: "template"; rank: number; activity: number; status: Template["status"] }
+  | { kind: "method"; status: string }
+);
 
 const CATEGORY_ACTIVITY_WEIGHT: Record<string, number> = {
   income: 980,
@@ -53,15 +59,39 @@ function formatActivityCount(activity: number): string {
   return `${activity}`;
 }
 
-const topBadges: BadgeCard[] = templates
+const rankedBadges: BadgeCard[] = templates
   .map(({ category, template }) => ({
-    rank: 0,
     activity: toActivityScore(category, template),
     category,
     template,
   }))
   .sort((a, b) => b.activity - a.activity)
-  .map((card, i) => ({ ...card, rank: i + 1 }));
+  .map(({ category, template, activity }, i) => ({
+    kind: "template",
+    id: template.name,
+    badge: template.badge,
+    claim: template.claim,
+    category,
+    risk: template.risk,
+    status: template.status,
+    source: hostOf(template.target.api_url),
+    activity,
+    rank: i + 1,
+  }));
+
+const workEmail = getMethod("employment/work-email");
+const topBadges: BadgeCard[] = workEmail
+  ? [{
+    kind: "method",
+    id: workEmail.id,
+    badge: workEmail.manifest.badge,
+    claim: "Prove access to a work email address without revealing the address.",
+    category: "employment",
+    risk: workEmail.manifest.risk,
+    status: "email ZKP",
+    source: "badge.zeroknowledger.com",
+  }, ...rankedBadges]
+  : rankedBadges;
 
 export default function BadgesPage() {
   return (
@@ -89,7 +119,7 @@ export default function BadgesPage() {
             marginBottom: 10,
           }}
         >
-          Seeded from TLSNotary templates
+          Badge directory
         </p>
         <h1
           style={{
@@ -99,7 +129,7 @@ export default function BadgesPage() {
             marginBottom: 12,
           }}
         >
-          Top badges by activity
+          Top badges
         </h1>
         <p
           style={{
@@ -109,9 +139,8 @@ export default function BadgesPage() {
             maxWidth: 680,
           }}
         >
-          Rankings are currently derived from your seeded template set and
-          category demand weighting. As real proofs come in, this page can
-          switch to live verification activity.{" "}
+          Browse featured badges and TLSNotary templates. Template rankings
+          use estimated activity.{" "}
           <Link to="/singpass/privacy" style={{ color: "#7ee787" }}>
             How your details stay private when you prove →
           </Link>
@@ -152,7 +181,7 @@ export default function BadgesPage() {
         >
           {topBadges.map((card) => (
             <article
-              key={card.template.name}
+              key={card.id}
               style={{
                 border: "1px solid #1f2937",
                 background: "#161b22",
@@ -171,9 +200,9 @@ export default function BadgesPage() {
                 }}
               >
                 <span style={{ fontSize: 12, color: "#8b949e" }}>
-                  #{card.rank}
+                  {card.kind === "template" ? `#${card.rank}` : "Featured"}
                 </span>
-                <span
+                {card.kind === "template" && <span
                   style={{
                     fontSize: 12,
                     color: "#7ee787",
@@ -184,7 +213,7 @@ export default function BadgesPage() {
                   }}
                 >
                   {formatActivityCount(card.activity)} activity
-                </span>
+                </span>}
               </div>
 
               <div
@@ -195,8 +224,8 @@ export default function BadgesPage() {
                   alignSelf: "flex-start",
                   borderRadius: 999,
                   padding: "6px 10px",
-                  border: `1px solid ${card.template.badge.color}44`,
-                  background: `${card.template.badge.color}22`,
+                  border: `1px solid ${card.badge.color}44`,
+                  background: `${card.badge.color}22`,
                 }}
               >
                 <span
@@ -204,14 +233,14 @@ export default function BadgesPage() {
                     width: 16,
                     height: 16,
                     borderRadius: "50%",
-                    background: card.template.badge.color,
+                    background: card.badge.color,
                     display: "inline-block",
                   }}
                 />
                 <span
                   style={{ fontSize: 13, fontWeight: 700, color: "#e6edf3" }}
                 >
-                  {card.template.badge.label}
+                  {card.badge.label}
                 </span>
               </div>
 
@@ -223,7 +252,7 @@ export default function BadgesPage() {
                   minHeight: 56,
                 }}
               >
-                {card.template.claim}
+                {card.claim}
               </p>
 
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -247,7 +276,7 @@ export default function BadgesPage() {
                     color: "#9fb3c8",
                   }}
                 >
-                  {card.template.status}
+                  {card.status}
                 </span>
                 <span
                   style={{
@@ -258,7 +287,7 @@ export default function BadgesPage() {
                     color: "#9fb3c8",
                   }}
                 >
-                  risk: {card.template.risk ?? "unknown"}
+                  risk: {card.risk ?? "unknown"}
                 </span>
               </div>
 
@@ -281,11 +310,17 @@ export default function BadgesPage() {
                     gap: 8,
                   }}
                 >
-                  <span>{card.template.name}</span>
-                  <span>{hostOf(card.template.target.api_url)}</span>
+                  <span>{card.id}</span>
+                  <span>{card.source}</span>
                 </div>
 
-                <ProveButton templateName={card.template.name} />
+                {card.kind === "method" ? (
+                  <Link to={`/methods/${card.id}`} style={{ color: "#7ee787", fontSize: 14, fontWeight: 600 }}>
+                    How to verify work email →
+                  </Link>
+                ) : (
+                  <ProveButton templateName={card.id} />
+                )}
               </div>
             </article>
           ))}
