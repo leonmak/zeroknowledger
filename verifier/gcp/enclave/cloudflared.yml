@@ -1,7 +1,7 @@
 # Public routes for enclave.<domain>, via a Cloudflare Tunnel run from inside
 # the enclave (no inbound ports on the VM). Only these paths are reachable.
 ingress:
-  - path: ^/enclave/(attestation|person)$
+  - path: ^/enclave/(attestation|person|mailbox)$
     service: http://127.0.0.1:7049
   - path: ^/(session|verifier|proxy|health|info)$
     service: http://127.0.0.1:7047

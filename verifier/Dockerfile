@@ -84,7 +84,7 @@ COPY src/templates.json /app/src/templates.json
 COPY gcp/enclave/config.yaml /app/config.yaml
 # Only these env vars may be set by the operator (VM metadata tee-env-*);
 # none of them can reveal the sealed key.
-LABEL "tee.launch_policy.allow_env_override"="WORKER_URL,WIF_AUDIENCE,KMS_KEY,KEY_BUCKET,ALLOWED_HOSTS,ATTESTATION_AUDIENCE,TUNNEL_ID,TUNNEL_CREDENTIALS"
+LABEL "tee.launch_policy.allow_env_override"="WORKER_URL,WIF_AUDIENCE,KMS_KEY,MAILBOX_KMS_KEY,KEY_BUCKET,ALLOWED_HOSTS,ATTESTATION_AUDIENCE,TUNNEL_ID,TUNNEL_CREDENTIALS"
 LABEL "tee.launch_policy.log_redirect"="always"
 CMD ["/app/gcp/enclave/start.sh"]
 

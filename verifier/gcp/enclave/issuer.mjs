@@ -33,6 +33,7 @@ import { readFileSync } from "node:fs";
 import { Aes256Gcm, CipherSuite, HkdfSha256 } from "@hpke/core";
 import { DhkemX25519HkdfSha256 } from "@hpke/dhkem-x25519";
 import { parsePublicInputs, verify, warm } from "../../proof-verifier/lib.mjs";
+import * as mailbox from "./mailbox.mjs";
 import templates from "../../src/templates.json" with { type: "json" };
 
 const env = (name, fallback) => {
@@ -45,6 +46,9 @@ const cfg = {
   workerUrl: env("WORKER_URL"),
   wifAudience: env("WIF_AUDIENCE"), // //iam.googleapis.com/projects/<num>/locations/global/workloadIdentityPools/<pool>/providers/<provider>
   kmsKey: env("KMS_KEY"), // projects/<p>/locations/<l>/keyRings/<r>/cryptoKeys/<k>
+  // A separate KMS key sealing a separate secret, for standupfor.xyz mailbox fingerprints
+  // (mailbox.mjs). Optional: without it, /enclave/mailbox is off.
+  mailboxKmsKey: process.env.MAILBOX_KMS_KEY ?? "",
   bucket: env("KEY_BUCKET"),
   attestationAudience: env("ATTESTATION_AUDIENCE", "zeroknowledger-registry"),
   allowedHosts: env("ALLOWED_HOSTS", "")
@@ -66,6 +70,9 @@ const GOOGLE = {
   gcs: process.env.TEST_GCS_URL ?? "https://storage.googleapis.com",
 };
 const KEY_OBJECT = "person-key.kms";
+const MAILBOX_KEY_OBJECT = "mailbox-key.kms";
+// DNS-over-HTTPS for DKIM keys. TLS ends inside the enclave, so the host can't forge answers.
+const DOH = process.env.TEST_DOH_URL ?? "https://cloudflare-dns.com/dns-query";
 
 // ---------- Google APIs, as the attested workload ----------
 
@@ -104,8 +111,8 @@ async function google(url, init = {}) {
   return res;
 }
 
-async function kms(op, field, b64) {
-  const res = await google(`${GOOGLE.kms}/v1/${cfg.kmsKey}:${op}`, {
+async function kms(op, field, b64, key = cfg.kmsKey) {
+  const res = await google(`${GOOGLE.kms}/v1/${key}:${op}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ [field]: b64 }),
@@ -114,20 +121,21 @@ async function kms(op, field, b64) {
   return res.json();
 }
 
-/** The sealed person key: created once, then only ever decrypted here. */
-async function loadPersonKey() {
-  const object = `${GOOGLE.gcs}/storage/v1/b/${cfg.bucket}/o/${encodeURIComponent(KEY_OBJECT)}?alt=media`;
+/** A sealed secret (the person key, or the mailbox key): created once, then only ever decrypted here. */
+async function loadSealedKey(kmsKey = cfg.kmsKey, name = KEY_OBJECT) {
+  const object = `${GOOGLE.gcs}/storage/v1/b/${cfg.bucket}/o/${encodeURIComponent(name)}?alt=media`;
   let res = await google(object);
   if (res.status === 404) {
     const { ciphertext } = await kms(
       "encrypt",
       "plaintext",
       randomBytes(32).toString("base64"),
+      kmsKey,
     );
     // ifGenerationMatch=0: only if absent, so two enclaves booting together
     // can't overwrite each other's key.
     const put = await google(
-      `${GOOGLE.gcs}/upload/storage/v1/b/${cfg.bucket}/o?uploadType=media&ifGenerationMatch=0&name=${encodeURIComponent(KEY_OBJECT)}`,
+      `${GOOGLE.gcs}/upload/storage/v1/b/${cfg.bucket}/o?uploadType=media&ifGenerationMatch=0&name=${encodeURIComponent(name)}`,
       {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
@@ -138,8 +146,8 @@ async function loadPersonKey() {
       throw new Error(`gcs put ${put.status}: ${await put.text()}`);
     console.log(
       put.ok
-        ? "created and sealed a new person key"
-        : "another enclave sealed the key first",
+        ? `created and sealed a new ${name}`
+        : `another enclave sealed ${name} first`,
     );
     res = await google(object);
   }
@@ -148,6 +156,7 @@ async function loadPersonKey() {
     "decrypt",
     "ciphertext",
     (await res.text()).trim(),
+    kmsKey,
   );
   return Buffer.from(plaintext, "base64");
 }
@@ -170,18 +179,20 @@ const hpke = new CipherSuite({
   aead: new Aes256Gcm(),
 });
 const HPKE_INFO = new TextEncoder().encode("zeroknowledger person proof v1");
+// A different label for mailbox proofs, so a sealed request for one endpoint can't be opened by the other.
+const HPKE_MAILBOX_INFO = new TextEncoder().encode("standupfor mailbox proof v1");
 const encryptionKey = await hpke.kem.generateKeyPair();
 const encryptionKeyRaw = Buffer.from(
   await hpke.kem.serializePublicKey(encryptionKey.publicKey),
 );
 
-/** Decrypts a sealed person proof; throws unless it was sealed for this proof id. */
-async function openSealed(sealed, proofId) {
+/** Decrypts a sealed proof; throws unless it was sealed for this id (and this endpoint's label). */
+async function openSealed(sealed, proofId, info = HPKE_INFO) {
   const plaintext = await hpke.open(
     {
       recipientKey: encryptionKey,
       enc: Buffer.from(sealed.enc, "base64"),
-      info: HPKE_INFO,
+      info,
     },
     Buffer.from(sealed.ct, "base64"),
     new TextEncoder().encode(proofId),
@@ -233,7 +244,8 @@ async function currentAttestation() {
 
 // ---------- the issuer ----------
 
-const personKey = await loadPersonKey();
+const personKey = await loadSealedKey();
+const mailboxKey = cfg.mailboxKmsKey ? await loadSealedKey(cfg.mailboxKmsKey, MAILBOX_KEY_OBJECT) : null;
 if (!(await warm())) throw new Error("proof verifier failed its warm-up check");
 /** proof_id -> authenticated commitments and the identity rule that permits them. */
 const pending = new Map();
@@ -354,6 +366,52 @@ async function onPerson(raw) {
   };
 }
 
+/**
+ * standupfor.xyz enrollment: the zkalumni Worker relays the browser's sealed zksender proof with
+ * the enrollment's code, identity commitment, required domain (or null) and DKIM selector. The
+ * answer (signed) is the mailbox fingerprint, and a hash of the public inputs without the
+ * nullifier, which the Worker checks against the copy it was given. See mailbox.mjs.
+ */
+async function onMailbox(raw) {
+  const { code, commitment, domain = null, selector, sealed } = JSON.parse(raw);
+  const fail = (reason) => ({ ok: false, code, reason });
+  if (!mailboxKey) return fail("mailbox fingerprints aren't enabled on this enclave");
+  if (!mailbox.isCode(code) || !mailbox.isCommitment(commitment) || !mailbox.isSelector(selector))
+    return fail("malformed request");
+  if (domain !== null && !mailbox.isDomain(domain)) return fail("malformed domain");
+  if (typeof sealed?.enc !== "string" || typeof sealed?.ct !== "string")
+    return fail("the proof must be sealed to the enclave");
+  let proof, publicInputs;
+  try {
+    ({ proof, publicInputs } = await openSealed(sealed, code, HPKE_MAILBOX_INFO));
+  } catch {
+    return fail("couldn't open the sealed proof (wrong key or code)");
+  }
+  const inputs = mailbox.readInputs(publicInputs);
+  if (!inputs || !mailbox.isDomain(inputs.domain)) return fail("malformed public inputs");
+  if (domain !== null && inputs.domain !== domain) return fail("proof is for a different domain");
+  // Only an email with this enrollment's own subject: a fresh email, not one the prover merely holds.
+  const subject = await mailbox.enrollSubject(code, commitment, domain);
+  if (inputs.binding !== mailbox.wordBinding(subject)) return fail("proof isn't over this enrollment's email");
+  let modulus;
+  try {
+    modulus = await mailbox.dnsModulus(inputs.domain, selector, DOH);
+  } catch (e) {
+    return fail(`couldn't fetch the DKIM key: ${e.message}`);
+  }
+  if (!mailbox.keyMatches(inputs, modulus)) return fail("proof wasn't signed with the domain's DKIM key");
+  if (!(await verify({ circuit: "zksender", proof, publicInputs }))) return fail("proof did not verify");
+  return {
+    ok: true,
+    code,
+    commitment,
+    domain: inputs.domain,
+    inputs_hash: mailbox.inputsHash(publicInputs),
+    fingerprint: createHmac("sha256", mailboxKey).update(`standupfor-mailbox:v1\n${inputs.nullifier}`).digest("hex"),
+    issued_at: Date.now(),
+  };
+}
+
 setInterval(() => {
   const now = Date.now();
   for (const [id, e] of pending) if (now > e.expires) pending.delete(id);
@@ -389,6 +447,8 @@ createServer(async (req, res) => {
     }
     if (req.method === "POST" && req.url === "/enclave/person")
       return send(200, await onPerson(await readBody(req)));
+    if (req.method === "POST" && req.url === "/enclave/mailbox")
+      return send(200, await onMailbox(await readBody(req)));
     // Local only: cloudflared never routes /webhook here.
     if (req.method === "POST" && req.url === "/webhook") {
       await onWebhook(await readBody(req));

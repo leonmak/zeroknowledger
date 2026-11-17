@@ -24,6 +24,7 @@ REPO=${REPO:-zk}
 IMAGE=${IMAGE:-$REGION-docker.pkg.dev/$PROJECT/$REPO/enclave}
 KEYRING=${KEYRING:-zk}
 KEY=${KEY:-person-key}
+MAILBOX_KEY=${MAILBOX_KEY:-mailbox-key} # a separate key, for standupfor.xyz mailbox fingerprints
 BUCKET=${BUCKET:-$PROJECT-enclave-keys}
 POOL=${POOL:-zk-enclave}
 PROVIDER=${PROVIDER:-confidential-space}
@@ -63,8 +64,10 @@ setup() {
   step "KMS key $KEYRING/$KEY (seals the person key; only the attested enclave may use it)"
   gcloud kms keyrings describe "$KEYRING" --project "$PROJECT" --location "$REGION" >/dev/null 2>&1 ||
     gcloud kms keyrings create "$KEYRING" --project "$PROJECT" --location "$REGION"
-  gcloud kms keys describe "$KEY" --keyring "$KEYRING" --project "$PROJECT" --location "$REGION" >/dev/null 2>&1 ||
-    gcloud kms keys create "$KEY" --keyring "$KEYRING" --project "$PROJECT" --location "$REGION" --purpose encryption
+  for k in "$KEY" "$MAILBOX_KEY"; do
+    gcloud kms keys describe "$k" --keyring "$KEYRING" --project "$PROJECT" --location "$REGION" >/dev/null 2>&1 ||
+      gcloud kms keys create "$k" --keyring "$KEYRING" --project "$PROJECT" --location "$REGION" --purpose encryption
+  done
 
   step "Bucket gs://$BUCKET (holds only the KMS-sealed key)"
   gcloud storage buckets describe "gs://$BUCKET" >/dev/null 2>&1 ||
@@ -118,9 +121,11 @@ allow() {
       --allowed-audiences "https://sts.googleapis.com" --attribute-mapping "google.subject=assertion.sub" \
       --attribute-condition "$condition"
   fi
-  step "Grant the attested enclave (and only it) the key and the bucket"
-  gcloud kms keys add-iam-policy-binding "$KEY" --keyring "$KEYRING" --project "$PROJECT" --location "$REGION" \
-    --member "$(pool_members)" --role roles/cloudkms.cryptoKeyEncrypterDecrypter >/dev/null
+  step "Grant the attested enclave (and only it) the keys and the bucket"
+  for k in "$KEY" "$MAILBOX_KEY"; do
+    gcloud kms keys add-iam-policy-binding "$k" --keyring "$KEYRING" --project "$PROJECT" --location "$REGION" \
+      --member "$(pool_members)" --role roles/cloudkms.cryptoKeyEncrypterDecrypter >/dev/null
+  done
   gcloud storage buckets add-iam-policy-binding "gs://$BUCKET" --member "$(pool_members)" \
     --role roles/storage.objectUser >/dev/null
 }
@@ -137,7 +142,7 @@ vm() {
     --confidential-compute-type TDX --maintenance-policy TERMINATE --shielded-secure-boot \
     --image-project confidential-space-images --image-family confidential-space \
     --service-account "$SA@$PROJECT.iam.gserviceaccount.com" --scopes cloud-platform \
-    --metadata "^~^tee-image-reference=$IMAGE@$digest~tee-restart-policy=Always~tee-container-log-redirect=true~tee-env-WORKER_URL=$WORKER_URL~tee-env-WIF_AUDIENCE=$audience~tee-env-KMS_KEY=projects/$PROJECT/locations/$REGION/keyRings/$KEYRING/cryptoKeys/$KEY~tee-env-KEY_BUCKET=$BUCKET~tee-env-ALLOWED_HOSTS=$(allowed_hosts)~tee-env-ATTESTATION_AUDIENCE=$AUDIENCE~tee-env-TUNNEL_ID=$tid~tee-env-TUNNEL_CREDENTIALS=$(base64 <~/.cloudflared/"$tid".json | tr -d '\n')"
+    --metadata "^~^tee-image-reference=$IMAGE@$digest~tee-restart-policy=Always~tee-container-log-redirect=true~tee-env-WORKER_URL=$WORKER_URL~tee-env-WIF_AUDIENCE=$audience~tee-env-KMS_KEY=projects/$PROJECT/locations/$REGION/keyRings/$KEYRING/cryptoKeys/$KEY~tee-env-MAILBOX_KMS_KEY=projects/$PROJECT/locations/$REGION/keyRings/$KEYRING/cryptoKeys/$MAILBOX_KEY~tee-env-KEY_BUCKET=$BUCKET~tee-env-ALLOWED_HOSTS=$(allowed_hosts)~tee-env-ATTESTATION_AUDIENCE=$AUDIENCE~tee-env-TUNNEL_ID=$tid~tee-env-TUNNEL_CREDENTIALS=$(base64 <~/.cloudflared/"$tid".json | tr -d '\n')"
   echo "Set the Worker's ENCLAVE_IMAGE_DIGESTS to: $(sed '/^$/d' "$DIGESTS_FILE" | paste -sd, -)"
 }
 
