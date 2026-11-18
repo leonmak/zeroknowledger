@@ -7,7 +7,7 @@
 //
 // So that the enclave isn't a guessing oracle, it only fingerprints a proof that
 //  - verifies, against a DKIM key the enclave fetched itself (DNS-over-HTTPS, TLS ends in here), and
-//  - is over an email whose subject is the seven words derived from this enrollment's random code
+//  - is over an email whose subject is the words (6 to 8) derived from this enrollment's random code
 //    and identity commitment. A subject can't be steered to match an old email, so the prover must
 //    be able to send new mail from the address, not merely hold mail it once sent.
 //
@@ -60,12 +60,17 @@ export const inputsHash = (publicInputs) =>
     .update(publicInputs.map((x, i) => (i === NULLIFIER_INDEX ? 0n : BigInt(x)).toString(16).padStart(64, "0")).join(","))
     .digest("hex");
 
-/** The seven-word enrollment subject for this code and commitment (zkalumni worker/groups.mjs). */
+/**
+ * The enrollment subject for this code and commitment, lowercase (zkalumni
+ * shared/company-email-subject.mjs wordEmailSubject: 6 to 8 words; it capitalises the first, which
+ * the circuit's case-insensitive encoding ignores).
+ */
 export async function enrollSubject(code, commitment, domain) {
   const namespace = domain ? `group-enroll:${domain}:${commitment}` : `group-enroll:${commitment}`;
-  const digest = new DataView(createHash("sha256").update(`${namespace}:words:v1:${code}`).digest().buffer.slice(0));
+  const digest = new DataView(createHash("sha512").update(`${namespace}:words:v2:${code}`).digest().buffer.slice(0));
+  const count = 6 + (digest.getUint8(63) % 3);
   const words = [];
-  for (let i = 0; i < 7; i++) words.push(WORDS[digest.getUint32(i * 4) % WORDS.length]);
+  for (let i = 0; i < count; i++) words.push(WORDS[digest.getUint32(i * 4) % WORDS.length]);
   return words.join(" ");
 }
 
