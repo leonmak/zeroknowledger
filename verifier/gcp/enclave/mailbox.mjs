@@ -7,13 +7,12 @@
 //
 // So that the enclave isn't a guessing oracle, it only fingerprints a proof that
 //  - verifies, against a DKIM key the enclave fetched itself (DNS-over-HTTPS, TLS ends in here), and
-//  - is over an email whose subject is the words (6 to 8) derived from this enrollment's random code
+//  - is over an email whose subject is the random letters derived from this enrollment's random code
 //    and identity commitment. A subject can't be steered to match an old email, so the prover must
 //    be able to send new mail from the address, not merely hold mail it once sent.
 //
 // Everything here mirrors zkalumni/shared (public-inputs.mjs, inputs.mjs, company-email-subject.mjs).
 import { createHash, createPublicKey } from "node:crypto";
-import WORDS from "./subject-words.json" with { type: "json" };
 
 const N = 18, DOMAIN_MAX = 64, KEY_BITS = 2048;
 export const PUBLIC_INPUT_COUNT = 2 * N + 1 + 1 + DOMAIN_MAX + 1; // modulus, redc, binding, nullifier, domain, len
@@ -61,17 +60,22 @@ export const inputsHash = (publicInputs) =>
     .digest("hex");
 
 /**
- * The enrollment subject for this code and commitment, lowercase (zkalumni
- * shared/company-email-subject.mjs wordEmailSubject: 6 to 8 words; it capitalises the first, which
- * the circuit's case-insensitive encoding ignores).
+ * The enrollment subject for this code and commitment (zkalumni shared/company-email-subject.mjs
+ * letterEmailSubject): random lowercase letters in words of 1 to 9, single spaces, 20 to 52 long.
  */
 export async function enrollSubject(code, commitment, domain) {
   const namespace = domain ? `group-enroll:${domain}:${commitment}` : `group-enroll:${commitment}`;
-  const digest = new DataView(createHash("sha512").update(`${namespace}:words:v2:${code}`).digest().buffer.slice(0));
-  const count = 6 + (digest.getUint8(63) % 3);
-  const words = [];
-  for (let i = 0; i < count; i++) words.push(WORDS[digest.getUint32(i * 4) % WORDS.length]);
-  return words.join(" ");
+  const bytes = Buffer.concat([0, 1, 2].map((block) => createHash("sha512").update(`${namespace}:letters:v3:${code}:${block}`).digest()));
+  let at = 0;
+  const next = (n) => { const v = bytes.readUInt16BE(at) % n; at += 2; return v; };
+  const length = 20 + next(33);
+  let subject = "";
+  while (subject.length < length) {
+    if (subject && length - subject.length >= 2) subject += " ";
+    const word = Math.min(1 + next(9), length - subject.length);
+    for (let i = 0; i < word; i++) subject += String.fromCharCode(97 + next(26));
+  }
+  return subject;
 }
 
 /** The circuit's base-27 encoding of a word subject (space = 0, a..z = 1..26, from 1). */
