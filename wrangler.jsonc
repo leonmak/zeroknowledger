@@ -3,6 +3,8 @@
   // client-side routes like /methods/dev/github-account-age load the app.
   "name": "zeroknowledger-web",
   "compatibility_date": "2026-09-01",
+  // www.zeroknowledger.com is attached as a custom domain (it replaced the Vercel CNAME).
+  "routes": [{ "pattern": "www.zeroknowledger.com", "custom_domain": true }],
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application",
